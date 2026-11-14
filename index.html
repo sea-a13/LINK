@@ -258,9 +258,6 @@
   </div>
 
   <script>
-    // ==========================================
-    // 1. ระบบ PWA & ฝังไอคอนนีออนอัตโนมัติในตัว
-    // ==========================================
     (function setupPWA() {
       const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
         <defs>
@@ -343,9 +340,6 @@
       deferredPrompt = null;
     }
 
-    // ==========================================
-    // 2. ข้อมูลและฟังก์ชันจัดการเว็บรวมลิงก์
-    // ==========================================
     const DEFAULT_STORES = [];
     const DEFAULT_CATEGORIES = ['ร้านขายโปรแกรมฟีฟาย', 'ลิ้งโปรแกรม'];
     const DEFAULT_HUB_INFO = {
@@ -811,15 +805,15 @@
               ${store.desc ? `<p class="text-xs text-zinc-600 dark:text-zinc-400 mb-4 line-clamp-3 bg-zinc-50 dark:bg-zinc-950/50 p-2.5 rounded-xl border border-zinc-100 dark:border-white/5">${escapeHtml(store.desc)}</p>` : '<div class="mb-2"></div>'}
             </div>
 
-            <!-- ส่วนปุ่มกด: เรียงบน-ล่าง เต็มความกว้าง ขนาดเท่ากัน -->
-            <div class="pt-3 border-t border-zinc-100 dark:border-white/5 flex flex-col gap-2">
-              <button onclick="copyToClipboard('${escapeHtml(store.url)}', 'ลิงก์')" class="w-full py-2.5 px-4 text-xs font-semibold rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 transition flex items-center justify-center gap-2">
+            <!-- ปุ่มคัดลอก (บน) และปุ่มเปิดลิงก์ (ล่าง) ยาวเต็มการ์ด ขนาดเท่ากัน -->
+            <div class="pt-3 border-t border-zinc-100 dark:border-white/5 flex flex-col gap-2.5">
+              <button onclick="copyToClipboard('${escapeHtml(store.url)}', 'ลิงก์')" class="w-full py-3 px-4 text-xs sm:text-sm font-semibold rounded-2xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 transition flex items-center justify-center gap-2 shadow-sm">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                 <span>คัดลอกลิงก์</span>
               </button>
               
-              <a href="${escapeHtml(store.url)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 text-xs font-bold rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-md shadow-cyan-500/25 transition flex items-center justify-center gap-2">
-                <span>เปิดลิงก์</span>
+              <a href="${escapeHtml(store.url)}" target="_blank" rel="noopener noreferrer" class="w-full py-3 px-4 text-xs sm:text-sm font-bold rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-md shadow-cyan-500/25 transition flex items-center justify-center gap-2">
+                <span>เปิดลิงก์เว็บไซต์</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
               </a>
             </div>
