@@ -41,7 +41,7 @@
             <h1 id="hubTitle" class="text-xl font-bold bg-gradient-to-r from-cyan-500 to-purple-600 dark:from-cyan-400 dark:to-purple-400 bg-clip-text text-transparent">
               เว็บรวมลิงก์ร้านค้าส่วนตัว
             </h1>
-            <button onclick="openEditTitleModal()" title="แก้ไขชื่อหัวเว็บ" class="p-1 text-zinc-400 hover:text-cyan-500 dark:hover:text-cyan-400 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5 transition">
+            <button onclick="openEditTitleModal()" title="แก้ไขชื่อหัวเว็บ" class="p-1.5 text-zinc-400 hover:text-cyan-500 dark:hover:text-cyan-400 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5 transition">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
             </button>
           </div>
@@ -58,25 +58,25 @@
         </button>
 
         <!-- ปุ่มติดตั้งแอป -->
-        <button id="installAppBtn" onclick="installPWA()" class="hidden items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition shadow-sm">
+        <button id="installAppBtn" onclick="installPWA()" class="hidden items-center gap-1.5 px-3 py-2.5 text-xs font-medium rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition shadow-sm">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-          ติดตั้งเป็นแอป
+          ติดตั้งแอป
         </button>
 
-        <button onclick="exportData()" title="สำรองข้อมูลเป็นไฟล์ JSON" class="px-3 py-2 text-xs font-medium rounded-xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 transition flex items-center gap-1.5">
+        <button onclick="exportData()" title="สำรองข้อมูลเป็นไฟล์ JSON" class="px-3 py-2.5 text-xs font-medium rounded-xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 transition flex items-center gap-1.5">
           <svg class="w-4 h-4 text-cyan-500 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
           ส่งออก
         </button>
 
-        <label title="นำเข้าข้อมูลจากไฟล์ JSON" class="px-3 py-2 text-xs font-medium rounded-xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 transition flex items-center gap-1.5 cursor-pointer">
+        <label title="นำเข้าข้อมูลจากไฟล์ JSON" class="px-3 py-2.5 text-xs font-medium rounded-xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 transition flex items-center gap-1.5 cursor-pointer">
           <svg class="w-4 h-4 text-purple-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
           นำเข้า
           <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
         </label>
 
-        <button onclick="openAddModal()" class="px-4 py-2 text-xs sm:text-sm font-medium rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-lg shadow-cyan-500/20 transition flex items-center gap-1.5">
+        <button onclick="openAddModal()" class="px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-lg shadow-cyan-500/20 transition flex items-center gap-1.5">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-          เพิ่มลิงก์ใหม่
+          + เพิ่มลิงก์ใหม่
         </button>
       </div>
     </div>
@@ -92,26 +92,26 @@
           <svg class="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
-          <input type="text" id="searchInput" oninput="renderStores()" placeholder="ค้นหาชื่อร้าน, ลิงก์ หรือรายละเอียด..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-cyan-500 shadow-sm transition">
+          <input type="text" id="searchInput" oninput="renderStores()" placeholder="🔍 ค้นหาชื่อโปรแกรม, ร้านค้า หรือรายละเอียด..." class="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-cyan-500 shadow-sm transition">
         </div>
 
         <!-- Sort Dropdown -->
         <div class="flex items-center gap-2 shrink-0">
           <label for="sortSelect" class="text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap">เรียงตาม:</label>
-          <select id="sortSelect" onchange="renderStores()" class="px-3 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-700 dark:text-zinc-200 focus:outline-none focus:border-cyan-500 shadow-sm transition cursor-pointer">
-            <option value="newest">เพิ่มล่าสุด (ปักหมุดบนสุด)</option>
-            <option value="oldest">เพิ่มเก่าสุด (ปักหมุดบนสุด)</option>
-            <option value="az">ชื่อ A - Z / ก - ฮ</option>
-            <option value="za">ชื่อ Z - A / ฮ - ก</option>
-            <option value="status">สถานะ (พร้อมใช้งานก่อน)</option>
+          <select id="sortSelect" onchange="renderStores()" class="px-3.5 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl text-xs font-medium text-zinc-700 dark:text-zinc-200 focus:outline-none focus:border-cyan-500 shadow-sm transition cursor-pointer">
+            <option value="newest">📌 เพิ่มล่าสุด (ปักหมุดบนสุด)</option>
+            <option value="oldest">🕰️ เพิ่มเก่าสุด</option>
+            <option value="az">🔤 ชื่อ A - Z / ก - ฮ</option>
+            <option value="za">🔤 ชื่อ Z - A / ฮ - ก</option>
+            <option value="status">🟢 สถานะ (พร้อมใช้งานก่อน)</option>
           </select>
         </div>
       </div>
 
       <!-- Category Filter Tabs -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-1">
+      <div class="flex items-center gap-2 overflow-x-auto pb-2 pt-1">
         <div id="categoryContainer" class="flex items-center gap-2"></div>
-        <button onclick="openCategoryModal()" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 transition shrink-0 flex items-center gap-1 shadow-sm">
+        <button onclick="openCategoryModal()" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 transition shrink-0 flex items-center gap-1.5 shadow-sm">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
           จัดการหมวดหมู่
         </button>
@@ -122,13 +122,13 @@
     <div id="storeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
     <!-- Empty State -->
-    <div id="emptyState" class="hidden flex-col items-center justify-center py-16 px-4 text-center bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl shadow-sm">
-      <div class="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 flex items-center justify-center mb-4 text-cyan-500 dark:text-cyan-400">
+    <div id="emptyState" class="hidden flex-col items-center justify-center py-20 px-4 text-center bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-3xl shadow-sm">
+      <div class="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-4 text-cyan-500 dark:text-cyan-400">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
       </div>
-      <h3 class="text-base font-semibold text-zinc-800 dark:text-zinc-200 mb-1">ไม่พบรายการลิงก์</h3>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mb-5">เริ่มต้นเพิ่มลิงก์ร้านขายโปรแกรม หรือลิงก์โปรแกรมที่คุณใช้งานบ่อยไว้ในที่เดียว</p>
-      <button onclick="openAddModal()" class="px-5 py-2.5 text-sm font-medium rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-lg shadow-cyan-500/20 transition">
+      <h3 class="text-base font-bold text-zinc-800 dark:text-zinc-200 mb-1">ยังไม่มีลิงก์ในหมวดหมู่นี้</h3>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mb-6">กดปุ่มด้านล่างเพื่อเพิ่มลิงก์ร้านค้า หรือโปรแกรมที่คุณใช้งานบ่อยได้เลยครับ</p>
+      <button onclick="openAddModal()" class="px-5 py-3 text-sm font-semibold rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-lg shadow-cyan-500/20 transition">
         + เพิ่มลิงก์แรกของคุณ
       </button>
     </div>
@@ -136,10 +136,10 @@
 
   <!-- Modal: เพิ่ม / แก้ไขลิงก์ -->
   <div id="storeModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between mb-4">
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-3xl w-full max-w-md p-6 sm:p-7 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-5">
         <h2 id="modalTitle" class="text-lg font-bold text-zinc-900 dark:text-white">เพิ่มลิงก์ใหม่</h2>
-        <button onclick="closeStoreModal()" class="text-zinc-400 hover:text-zinc-700 dark:hover:text-white p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5">
+        <button onclick="closeStoreModal()" class="text-zinc-400 hover:text-zinc-700 dark:hover:text-white p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
@@ -148,56 +148,56 @@
         <input type="hidden" id="storeId">
         
         <div>
-          <label class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">ชื่อร้าน / ชื่อโปรแกรม *</label>
-          <input type="text" id="storeName" required placeholder="เช่น ร้านขายโปร FF VIP" class="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500">
+          <label class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">ชื่อร้าน / ชื่อโปรแกรม *</label>
+          <input type="text" id="storeName" required placeholder="เช่น โปรแกรม FF VIP 2026" class="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500 transition">
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">ลิงก์ URL *</label>
-          <input type="url" id="storeUrl" required placeholder="https://example.com" class="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500">
+          <label class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">ลิงก์ URL *</label>
+          <input type="url" id="storeUrl" required placeholder="https://example.com" class="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500 transition">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <label class="block text-xs font-medium text-zinc-700 dark:text-zinc-300">หมวดหมู่ *</label>
-              <button type="button" onclick="quickAddCategory()" class="text-[11px] text-cyan-600 dark:text-cyan-400 hover:underline">+ เพิ่มใหม่</button>
+              <label class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">หมวดหมู่ *</label>
+              <button type="button" onclick="quickAddCategory()" class="text-[11px] font-medium text-cyan-600 dark:text-cyan-400 hover:underline">+ เพิ่มใหม่</button>
             </div>
-            <select id="storeCategory" required class="w-full px-3 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500"></select>
+            <select id="storeCategory" required class="w-full px-3.5 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500 transition cursor-pointer"></select>
           </div>
 
           <div>
-            <label class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">ป้ายสถานะ</label>
-            <select id="storeStatus" class="w-full px-3 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500">
+            <label class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">ป้ายสถานะ</label>
+            <select id="storeStatus" class="w-full px-3.5 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500 transition cursor-pointer">
               <option value="none">ไม่แสดงป้าย</option>
-              <option value="active">🟢 พร้อมใช้งาน / ปกติ</option>
+              <option value="active">🟢 พร้อมใช้งาน</option>
               <option value="updating">🟡 กำลังอัปเดต</option>
-              <option value="offline">🔴 ปิดปรับปรุง / หมดอายุ</option>
+              <option value="offline">🔴 ปิดปรับปรุง</option>
             </select>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">รายละเอียดเพิ่มเติม (ไม่บังคับ)</label>
-          <textarea id="storeDesc" rows="2" placeholder="โน้ตสั้นๆ เช่น รหัสผ่าน, ราคา, หรือรายละเอียดร้าน..." class="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500"></textarea>
+          <label class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">รายละเอียดเพิ่มเติม / โน้ต (ไม่บังคับ)</label>
+          <textarea id="storeDesc" rows="2.5" placeholder="เช่น รหัสผ่าน, ราคา, หรือโน้ตสั้นๆ..." class="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500 transition"></textarea>
         </div>
 
-        <div class="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10">
-          <div class="flex items-center gap-2">
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10">
+          <div class="flex items-center gap-2.5">
             <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <span class="text-xs font-medium text-zinc-700 dark:text-zinc-300">ปักหมุดไว้บนสุดเสมอ</span>
+            <span class="text-xs font-semibold text-zinc-700 dark:text-zinc-300">ปักหมุดไว้บนสุดเสมอ</span>
           </div>
           <input type="checkbox" id="storePinned" class="w-4 h-4 accent-cyan-500 rounded cursor-pointer">
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">เลือกไอคอน</label>
+          <label class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-2">เลือกไอคอน</label>
           <div id="iconPicker" class="grid grid-cols-6 gap-2"></div>
         </div>
 
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeStoreModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition">ยกเลิก</button>
-          <button type="submit" class="px-5 py-2 text-xs font-medium rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-lg shadow-cyan-500/20 transition">บันทึกข้อมูล</button>
+        <div class="flex justify-end gap-2.5 pt-3">
+          <button type="button" onclick="closeStoreModal()" class="px-4 py-2.5 text-xs font-semibold rounded-xl bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition">ยกเลิก</button>
+          <button type="submit" class="px-5 py-2.5 text-xs font-semibold rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-lg shadow-cyan-500/20 transition">บันทึกข้อมูล</button>
         </div>
       </form>
     </div>
@@ -205,45 +205,45 @@
 
   <!-- Modal: จัดการหมวดหมู่ -->
   <div id="categoryModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-      <div class="flex items-center justify-between mb-4">
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-3xl w-full max-w-md p-6 sm:p-7 shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
         <h2 class="text-lg font-bold text-zinc-900 dark:text-white">จัดการหมวดหมู่</h2>
-        <button onclick="closeCategoryModal()" class="text-zinc-400 hover:text-zinc-700 dark:hover:text-white p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5">
+        <button onclick="closeCategoryModal()" class="text-zinc-400 hover:text-zinc-700 dark:hover:text-white p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
 
       <form onsubmit="addNewCategory(event)" class="flex gap-2 mb-4">
-        <input type="text" id="newCategoryInput" required placeholder="พิมพ์ชื่อหมวดหมู่ใหม่..." class="flex-1 px-3.5 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500">
-        <button type="submit" class="px-4 py-2 text-xs font-medium rounded-xl bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-semibold transition shrink-0">เพิ่ม</button>
+        <input type="text" id="newCategoryInput" required placeholder="ชื่อหมวดหมู่ใหม่..." class="flex-1 px-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500 transition">
+        <button type="submit" class="px-4 py-3 text-xs font-bold rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-zinc-950 transition shrink-0">เพิ่ม</button>
       </form>
 
-      <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-2">รายการหมวดหมู่ทั้งหมด (กดแก้ไขชื่อหรือลบได้)</div>
+      <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-2">รายการหมวดหมู่ทั้งหมด (กดแก้ไขหรือลบได้)</div>
       <div id="manageCategoryList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
     </div>
   </div>
 
   <!-- Modal: แก้ไขชื่อหัวเว็บ -->
   <div id="titleModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-      <div class="flex items-center justify-between mb-4">
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-3xl w-full max-w-md p-6 sm:p-7 shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
         <h2 class="text-lg font-bold text-zinc-900 dark:text-white">แก้ไขข้อมูลหัวเว็บ</h2>
-        <button onclick="closeEditTitleModal()" class="text-zinc-400 hover:text-zinc-700 dark:hover:text-white p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5">
+        <button onclick="closeEditTitleModal()" class="text-zinc-400 hover:text-zinc-700 dark:hover:text-white p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
       <form onsubmit="saveHubInfo(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">ชื่อเว็บไซต์</label>
-          <input type="text" id="editHubTitleInput" required class="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500">
+          <label class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">ชื่อเว็บไซต์</label>
+          <input type="text" id="editHubTitleInput" required class="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500 transition">
         </div>
         <div>
-          <label class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">คำอธิบายย่อย</label>
-          <input type="text" id="editHubSubtitleInput" class="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500">
+          <label class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">คำอธิบายย่อย</label>
+          <input type="text" id="editHubSubtitleInput" class="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500 transition">
         </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeEditTitleModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition">ยกเลิก</button>
-          <button type="submit" class="px-5 py-2 text-xs font-medium rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white transition">บันทึก</button>
+        <div class="flex justify-end gap-2.5 pt-3">
+          <button type="button" onclick="closeEditTitleModal()" class="px-4 py-2.5 text-xs font-semibold rounded-xl bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition">ยกเลิก</button>
+          <button type="submit" class="px-5 py-2.5 text-xs font-semibold rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white transition">บันทึก</button>
         </div>
       </form>
     </div>
@@ -251,8 +251,8 @@
 
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-    <div id="toastInner" class="px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-cyan-500/40 text-zinc-900 dark:text-zinc-100 text-xs font-medium shadow-xl flex items-center gap-2">
-      <span id="toastIcon" class="w-2 h-2 rounded-full bg-cyan-500"></span>
+    <div id="toastInner" class="px-4.5 py-3 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-cyan-500/40 text-zinc-900 dark:text-zinc-100 text-xs font-semibold shadow-2xl flex items-center gap-2.5">
+      <span id="toastIcon" class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
       <span id="toastMessage">ข้อความแจ้งเตือน</span>
     </div>
   </div>
@@ -411,7 +411,6 @@
       renderStores();
     };
 
-    // Dark / Light Mode Toggle
     function toggleTheme() {
       const htmlEl = document.documentElement;
       if (htmlEl.classList.contains('dark')) {
@@ -465,12 +464,20 @@
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
+    function copyToClipboard(text, label = 'ลิงก์') {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`คัดลอก${label}เรียบร้อย!`);
+      }).catch(() => {
+        showToast('ไม่สามารถคัดลอกได้', 'error');
+      });
+    }
+
     function showToast(msg, type = 'success') {
       const toast = document.getElementById('toast');
       const icon = document.getElementById('toastIcon');
       const text = document.getElementById('toastMessage');
       text.textContent = msg;
-      icon.className = type === 'error' ? 'w-2 h-2 rounded-full bg-rose-500' : 'w-2 h-2 rounded-full bg-cyan-500';
+      icon.className = type === 'error' ? 'w-2.5 h-2.5 rounded-full bg-rose-500' : 'w-2.5 h-2.5 rounded-full bg-cyan-500';
       toast.classList.remove('translate-y-20', 'opacity-0');
       clearTimeout(toastTimeout);
       toastTimeout = setTimeout(() => {
@@ -517,7 +524,7 @@
         const activeClass = isActive
           ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white border-transparent shadow-md shadow-cyan-500/20'
           : 'bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 border-zinc-200 dark:border-white/10 shadow-sm';
-        return `<button onclick="selectCategory('${escapeHtml(cat).replace(/'/g, "\\'")}')" class="px-3.5 py-1.5 rounded-xl text-xs font-medium border transition shrink-0 ${activeClass}">${escapeHtml(cat)}</button>`;
+        return `<button onclick="selectCategory('${escapeHtml(cat).replace(/'/g, "\\'")}')" class="px-4 py-2 rounded-xl text-xs font-semibold border transition shrink-0 ${activeClass}">${escapeHtml(cat)}</button>`;
       }).join('');
     }
 
@@ -645,22 +652,22 @@
       list.innerHTML = categories.map((cat, idx) => {
         if (editingCategoryIndex === idx) {
           return `
-            <div class="flex items-center gap-2 p-2 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-cyan-500/50">
-              <input type="text" id="editCatInput_${idx}" value="${escapeHtml(cat)}" class="flex-1 px-2.5 py-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none">
-              <button onclick="saveEditCategory(${idx})" class="px-2.5 py-1 text-xs rounded-lg bg-cyan-500 text-zinc-950 font-semibold">บันทึก</button>
-              <button onclick="editingCategoryIndex=-1;renderManageCategoryList()" class="px-2 py-1 text-xs rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">ยกเลิก</button>
+            <div class="flex items-center gap-2 p-2.5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-cyan-500/50">
+              <input type="text" id="editCatInput_${idx}" value="${escapeHtml(cat)}" class="flex-1 px-3 py-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl text-xs text-zinc-900 dark:text-white focus:outline-none">
+              <button onclick="saveEditCategory(${idx})" class="px-3 py-1.5 text-xs rounded-xl bg-cyan-500 text-zinc-950 font-bold">บันทึก</button>
+              <button onclick="editingCategoryIndex=-1;renderManageCategoryList()" class="px-2.5 py-1.5 text-xs rounded-xl bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">ยกเลิก</button>
             </div>
           `;
         }
         return `
-          <div class="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/5">
-            <span class="text-xs font-medium text-zinc-800 dark:text-zinc-200">${escapeHtml(cat)}</span>
+          <div class="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/5">
+            <span class="text-xs font-semibold text-zinc-800 dark:text-zinc-200">${escapeHtml(cat)}</span>
             <div class="flex items-center gap-1">
-              <button onclick="startEditCategory(${idx})" title="แก้ไขชื่อ" class="p-1.5 text-zinc-400 hover:text-cyan-500 dark:hover:text-cyan-400 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              <button onclick="startEditCategory(${idx})" title="แก้ไขชื่อ" class="p-2 text-zinc-400 hover:text-cyan-500 dark:hover:text-cyan-400 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
               </button>
-              <button onclick="deleteCategory(${idx})" title="ลบหมวดหมู่" class="p-1.5 text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              <button onclick="deleteCategory(${idx})" title="ลบหมวดหมู่" class="p-2 text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
               </button>
             </div>
           </div>
@@ -668,16 +675,16 @@
       }).join('');
     }
 
-    // ไอคอนและการจัดการร้านค้า
+    // ไอคอน
     function renderIconPicker() {
       const picker = document.getElementById('iconPicker');
       picker.innerHTML = ICONS_LIST.map(item => {
         const isSelected = item.id === selectedIcon;
         const cls = isSelected
-          ? 'bg-cyan-500/20 border-cyan-500 text-cyan-600 dark:text-cyan-300'
+          ? 'bg-cyan-500/20 border-cyan-500 text-cyan-600 dark:text-cyan-300 ring-2 ring-cyan-500/30'
           : 'bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-white/10 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200';
         return `
-          <button type="button" onclick="selectIcon('${item.id}')" class="p-2.5 rounded-xl border flex items-center justify-center transition ${cls}">
+          <button type="button" onclick="selectIcon('${item.id}')" class="p-3 rounded-2xl border flex items-center justify-center transition ${cls}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">${item.svg}</svg>
           </button>
         `;
@@ -694,7 +701,6 @@
       return found ? found.svg : ICONS_LIST[0].svg;
     }
 
-    // สลับสถานะการปักหมุด
     function togglePin(id) {
       const index = stores.findIndex(s => s.id === id);
       if (index === -1) return;
@@ -710,14 +716,12 @@
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const sortBy = document.getElementById('sortSelect').value;
 
-      // 1. กรองหมวดหมู่และคำค้นหา
       let filtered = stores.filter(store => {
         const matchCat = selectedCategory === 'ทั้งหมด' || store.category === selectedCategory;
         const matchQuery = !query || store.name.toLowerCase().includes(query) || (store.desc && store.desc.toLowerCase().includes(query)) || store.url.toLowerCase().includes(query);
         return matchCat && matchQuery;
       });
 
-      // 2. จัดเรียงลำดับ (ปักหมุดอยู่บนสุดเสมอ ตามด้วยเงื่อนไข Sort)
       filtered.sort((a, b) => {
         const pinA = a.pinned ? 1 : 0;
         const pinB = b.pinned ? 1 : 0;
@@ -736,7 +740,6 @@
           const tB = parseInt((b.id || '').replace('store_', '')) || 0;
           return tA - tB;
         }
-        // ค่าเริ่มต้น 'newest': ใช้ลำดับใน array (รายการใหม่ถูก unshift ไว้หน้าสุด)
         return stores.indexOf(a) - stores.indexOf(b);
       });
 
@@ -756,9 +759,8 @@
         const statusKey = store.status && STATUS_CONFIG[store.status] ? store.status : 'none';
         const statusInfo = STATUS_CONFIG[statusKey];
 
-        // กรอบการ์ด: ถ้าปักหมุดให้เน้นขอบสีฟ้าอมม่วง หรือถ้ามีสถานะให้ใช้สีขอบตามสถานะ
         const cardBorderClass = isPinned
-          ? 'border-cyan-500/60 dark:border-cyan-400/50 ring-1 ring-cyan-500/20'
+          ? 'border-cyan-500/60 dark:border-cyan-400/50 ring-2 ring-cyan-500/20 shadow-lg shadow-cyan-500/5'
           : statusInfo.cardBorder;
 
         const pinBtnClass = isPinned
@@ -766,53 +768,59 @@
           : 'text-zinc-400 hover:text-amber-500 hover:bg-zinc-100 dark:hover:bg-white/5 opacity-80 sm:opacity-0 group-hover:opacity-100';
 
         const statusBadgeHtml = statusKey !== 'none'
-          ? `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium border ${statusInfo.badgeClass}">
-               <span class="w-1.5 h-1.5 rounded-full ${statusInfo.dotClass}"></span>
-               ${statusInfo.label}
-             </span>`
+          ? `<div class="flex flex-col gap-0.5">
+               <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-semibold border ${statusInfo.badgeClass}">
+                 <span class="w-1.5 h-1.5 rounded-full ${statusInfo.dotClass}"></span>
+                 ${statusInfo.label}
+               </span>
+               ${store.statusUpdatedAt ? `<span class="text-[9px] text-zinc-400 px-0.5">อัปเดต: ${escapeHtml(store.statusUpdatedAt)}</span>` : ''}
+             </div>`
           : '';
 
         return `
-          <div class="group relative bg-white dark:bg-zinc-900 border ${cardBorderClass} rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-cyan-500/50 transition flex flex-col justify-between">
+          <div class="group relative bg-white dark:bg-zinc-900 border ${cardBorderClass} rounded-3xl p-5 shadow-sm hover:shadow-xl hover:border-cyan-500/50 transition duration-300 flex flex-col justify-between">
             <div>
               <div class="flex items-start justify-between gap-2 mb-3">
-                <div class="flex items-center gap-3 min-w-0">
-                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/10 to-purple-500/10 dark:from-cyan-500/20 dark:to-purple-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">${iconSvg}</svg>
+                <div class="flex items-center gap-3.5 min-w-0">
+                  <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/10 to-purple-500/10 dark:from-cyan-500/20 dark:to-purple-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0 shadow-inner">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">${iconSvg}</svg>
                   </div>
                   <div class="min-w-0">
-                    <div class="flex items-center gap-1.5">
-                      <h3 class="font-semibold text-sm text-zinc-900 dark:text-white truncate">${escapeHtml(store.name)}</h3>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                      <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">${escapeHtml(store.category)}</span>
+                    <h3 class="font-bold text-sm sm:text-base text-zinc-900 dark:text-white truncate">${escapeHtml(store.name)}</h3>
+                    <div class="flex flex-wrap items-center gap-2 mt-1.5">
+                      <span class="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">${escapeHtml(store.category)}</span>
                       ${statusBadgeHtml}
                     </div>
                   </div>
                 </div>
 
-                <!-- Action Buttons (Pin / Edit / Delete) -->
+                <!-- Action Buttons -->
                 <div class="flex items-center gap-1 shrink-0">
-                  <button onclick="togglePin('${store.id}')" title="${isPinned ? 'ยกเลิกปักหมุด' : 'ปักหมุดไว้บนสุด'}" class="p-1.5 rounded-lg transition ${pinBtnClass}">
+                  <button onclick="togglePin('${store.id}')" title="${isPinned ? 'ยกเลิกปักหมุด' : 'ปักหมุดไว้บนสุด'}" class="p-2 rounded-xl transition ${pinBtnClass}">
                     <svg class="w-4 h-4" fill="${isPinned ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
                   </button>
-                  <button onclick="editStore('${store.id}')" title="แก้ไขลิงก์" class="p-1.5 text-zinc-400 hover:text-cyan-500 dark:hover:text-cyan-400 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5 opacity-80 sm:opacity-0 group-hover:opacity-100 transition">
+                  <button onclick="editStore('${store.id}')" title="แก้ไขลิงก์" class="p-2 text-zinc-400 hover:text-cyan-500 dark:hover:text-cyan-400 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 opacity-80 sm:opacity-0 group-hover:opacity-100 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                   </button>
-                  <button onclick="deleteStore('${store.id}')" title="ลบลิงก์" class="p-1.5 text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5 opacity-80 sm:opacity-0 group-hover:opacity-100 transition">
+                  <button onclick="deleteStore('${store.id}')" title="ลบลิงก์" class="p-2 text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 opacity-80 sm:opacity-0 group-hover:opacity-100 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                   </button>
                 </div>
               </div>
 
-              ${store.desc ? `<p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4 line-clamp-2">${escapeHtml(store.desc)}</p>` : '<div class="mb-2"></div>'}
+              ${store.desc ? `<p class="text-xs text-zinc-600 dark:text-zinc-400 mb-4 line-clamp-3 bg-zinc-50 dark:bg-zinc-950/50 p-2.5 rounded-xl border border-zinc-100 dark:border-white/5">${escapeHtml(store.desc)}</p>` : '<div class="mb-2"></div>'}
             </div>
 
-            <div class="pt-3 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between gap-2">
-              <span class="text-[11px] text-zinc-400 truncate max-w-[150px]">${escapeHtml(store.url)}</span>
-              <a href="${escapeHtml(store.url)}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 text-xs font-medium rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-sm transition flex items-center gap-1 shrink-0">
-                <span>ไปที่ลิงก์</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            <!-- ส่วนปุ่มกด: เรียงบน-ล่าง เต็มความกว้าง ขนาดเท่ากัน -->
+            <div class="pt-3 border-t border-zinc-100 dark:border-white/5 flex flex-col gap-2">
+              <button onclick="copyToClipboard('${escapeHtml(store.url)}', 'ลิงก์')" class="w-full py-2.5 px-4 text-xs font-semibold rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 transition flex items-center justify-center gap-2">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                <span>คัดลอกลิงก์</span>
+              </button>
+              
+              <a href="${escapeHtml(store.url)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 text-xs font-bold rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-md shadow-cyan-500/25 transition flex items-center justify-center gap-2">
+                <span>เปิดลิงก์</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
               </a>
             </div>
           </div>
@@ -866,25 +874,32 @@
       const name = document.getElementById('storeName').value.trim();
       const url = document.getElementById('storeUrl').value.trim();
       const category = document.getElementById('storeCategory').value;
-      const status = document.getElementById('storeStatus').value;
+      const newStatus = document.getElementById('storeStatus').value;
       const desc = document.getElementById('storeDesc').value.trim();
       const pinned = document.getElementById('storePinned').checked;
 
       if (!name || !url) return;
 
+      const now = new Date();
+      const timeStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
       if (id) {
         const index = stores.findIndex(s => s.id === id);
         if (index !== -1) {
-          stores[index] = { ...stores[index], name, url, category, status, desc, pinned, icon: selectedIcon };
+          const oldStatus = stores[index].status;
+          const statusUpdatedAt = (newStatus !== oldStatus) ? timeStr : (stores[index].statusUpdatedAt || (newStatus !== 'none' ? timeStr : ''));
+          stores[index] = { ...stores[index], name, url, category, status: newStatus, statusUpdatedAt, desc, pinned, icon: selectedIcon };
         }
         showToast('อัปเดตลิงก์สำเร็จ');
       } else {
+        const statusUpdatedAt = newStatus !== 'none' ? timeStr : '';
         const newStore = {
           id: 'store_' + Date.now(),
           name,
           url,
           category,
-          status,
+          status: newStatus,
+          statusUpdatedAt,
           desc,
           pinned,
           icon: selectedIcon
@@ -906,7 +921,7 @@
       showToast('ลบลิงก์เรียบร้อย');
     }
 
-    // สำรองข้อมูล & นำเข้าข้อมูล (Export / Import JSON)
+    // Export / Import JSON
     function exportData() {
       const data = {
         hubInfo,
