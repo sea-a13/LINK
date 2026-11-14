@@ -8,6 +8,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="StoreHub">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./storehub-icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./storehub-icon-192.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -258,65 +261,13 @@
   </div>
 
   <script>
-    (function setupPWA() {
-      const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-        <defs>
-          <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#09090b"/>
-            <stop offset="100%" stop-color="#18181b"/>
-          </linearGradient>
-          <linearGradient id="neon" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#06b6d4"/>
-            <stop offset="100%" stop-color="#9333ea"/>
-          </linearGradient>
-        </defs>
-        <rect width="512" height="512" rx="115" fill="url(#bg)"/>
-        <rect x="24" y="24" width="464" height="464" rx="95" fill="none" stroke="url(#neon)" stroke-width="16"/>
-        <path d="M210 302l92-92M185 245l-35 35a65 65 0 0092 92l35-35M327 267l35-35a65 65 0 00-92-92l-35 35" fill="none" stroke="url(#neon)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`;
-
-      const iconDataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgIcon)));
-
-      const linkIcon = document.createElement('link');
-      linkIcon.rel = 'icon';
-      linkIcon.href = iconDataUrl;
-      document.head.appendChild(linkIcon);
-
-      const appleIcon = document.createElement('link');
-      appleIcon.rel = 'apple-touch-icon';
-      appleIcon.href = iconDataUrl;
-      document.head.appendChild(appleIcon);
-
-      const manifest = {
-        name: "เว็บรวมลิงก์ร้านค้าส่วนตัว",
-        short_name: "StoreHub",
-        start_url: window.location.href,
-        display: "standalone",
-        background_color: "#09090b",
-        theme_color: "#09090b",
-        icons: [
-          { src: iconDataUrl, sizes: "192x192", type: "image/svg+xml" },
-          { src: iconDataUrl, sizes: "512x512", type: "image/svg+xml" }
-        ]
-      };
-      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
-      const manifestUrl = URL.createObjectURL(manifestBlob);
-      const manifestLink = document.createElement('link');
-      manifestLink.rel = 'manifest';
-      manifestLink.href = manifestUrl;
-      document.head.appendChild(manifestLink);
-
-      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
-        const swCode = `
-          self.addEventListener('install', (e) => self.skipWaiting());
-          self.addEventListener('activate', (e) => self.clients.claim());
-          self.addEventListener('fetch', (e) => {});
-        `;
-        const swBlob = new Blob([swCode], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(swBlob);
-        navigator.serviceWorker.register(swUrl).catch(() => {});
-      }
-    })();
+    // PWA: ใช้ไฟล์ manifest และ service worker จริง เพื่อให้ติดตั้ง/ออฟไลน์ได้บน HTTPS หรือ localhost
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+          .catch(() => showToast('ไม่สามารถเปิดใช้งานโหมดออฟไลน์ได้', 'error'));
+      });
+    }
 
     let deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -433,9 +384,18 @@
         const savedStores = localStorage.getItem('private_link_hub_v2');
         const savedCategories = localStorage.getItem('private_categories_v2');
         const savedHub = localStorage.getItem('private_hub_info_v2');
-        stores = savedStores ? JSON.parse(savedStores) : [...DEFAULT_STORES];
-        categories = savedCategories ? JSON.parse(savedCategories) : [...DEFAULT_CATEGORIES];
-        hubInfo = savedHub ? JSON.parse(savedHub) : { ...DEFAULT_HUB_INFO };
+        const parsedStores = savedStores ? JSON.parse(savedStores) : [...DEFAULT_STORES];
+        const parsedCategories = savedCategories ? JSON.parse(savedCategories) : [...DEFAULT_CATEGORIES];
+        const parsedHub = savedHub ? JSON.parse(savedHub) : { ...DEFAULT_HUB_INFO };
+        stores = Array.isArray(parsedStores) ? parsedStores.filter(isValidStore) : [...DEFAULT_STORES];
+        categories = Array.isArray(parsedCategories)
+          ? [...new Set(parsedCategories.filter(c => typeof c === 'string' && c.trim() && c !== 'ทั้งหมด'))]
+          : [...DEFAULT_CATEGORIES];
+        hubInfo = parsedHub && typeof parsedHub === 'object' && !Array.isArray(parsedHub)
+          ? { title: typeof parsedHub.title === 'string' ? parsedHub.title : DEFAULT_HUB_INFO.title,
+              subtitle: typeof parsedHub.subtitle === 'string' ? parsedHub.subtitle : DEFAULT_HUB_INFO.subtitle }
+          : { ...DEFAULT_HUB_INFO };
+        if (!categories.length) categories = [...DEFAULT_CATEGORIES];
       } catch (e) {
         stores = [...DEFAULT_STORES];
         categories = [...DEFAULT_CATEGORIES];
@@ -456,6 +416,32 @@
     function escapeHtml(str) {
       if (!str) return '';
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // เข้ารหัสค่าที่ฝังใน inline handler เพื่อไม่ให้ข้อมูลนำเข้าแทรก JavaScript/HTML ได้
+    function safeJsArg(value) {
+      return encodeURIComponent(String(value)).replace(/'/g, '%27');
+    }
+
+    function isSafeHttpUrl(value) {
+      try {
+        const parsed = new URL(String(value));
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function isValidStore(store) {
+      return !!store && typeof store === 'object' && !Array.isArray(store) &&
+        typeof store.id === 'string' && store.id.length > 0 &&
+        typeof store.name === 'string' && store.name.trim().length > 0 &&
+        typeof store.url === 'string' && isSafeHttpUrl(store.url) &&
+        typeof store.category === 'string' && store.category.trim().length > 0 &&
+        (store.status == null || ['none', 'active', 'updating', 'offline'].includes(store.status)) &&
+        (store.desc == null || typeof store.desc === 'string') &&
+        (store.pinned == null || typeof store.pinned === 'boolean') &&
+        (store.icon == null || ICONS_LIST.some(icon => icon.id === store.icon));
     }
 
     function copyToClipboard(text, label = 'ลิงก์') {
@@ -518,7 +504,7 @@
         const activeClass = isActive
           ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white border-transparent shadow-md shadow-cyan-500/20'
           : 'bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 border-zinc-200 dark:border-white/10 shadow-sm';
-        return `<button onclick="selectCategory('${escapeHtml(cat).replace(/'/g, "\\'")}')" class="px-4 py-2 rounded-xl text-xs font-semibold border transition shrink-0 ${activeClass}">${escapeHtml(cat)}</button>`;
+        return `<button onclick="selectCategory(decodeURIComponent('${safeJsArg(cat)}'))" class="px-4 py-2 rounded-xl text-xs font-semibold border transition shrink-0 ${activeClass}">${escapeHtml(cat)}</button>`;
       }).join('');
     }
 
@@ -790,13 +776,13 @@
 
                 <!-- Action Buttons -->
                 <div class="flex items-center gap-1 shrink-0">
-                  <button onclick="togglePin('${store.id}')" title="${isPinned ? 'ยกเลิกปักหมุด' : 'ปักหมุดไว้บนสุด'}" class="p-2 rounded-xl transition ${pinBtnClass}">
+                  <button onclick="togglePin(decodeURIComponent('${safeJsArg(store.id)}'))" title="${isPinned ? 'ยกเลิกปักหมุด' : 'ปักหมุดไว้บนสุด'}" class="p-2 rounded-xl transition ${pinBtnClass}">
                     <svg class="w-4 h-4" fill="${isPinned ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
                   </button>
-                  <button onclick="editStore('${store.id}')" title="แก้ไขลิงก์" class="p-2 text-zinc-400 hover:text-cyan-500 dark:hover:text-cyan-400 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 opacity-80 sm:opacity-0 group-hover:opacity-100 transition">
+                  <button onclick="editStore(decodeURIComponent('${safeJsArg(store.id)}'))" title="แก้ไขลิงก์" class="p-2 text-zinc-400 hover:text-cyan-500 dark:hover:text-cyan-400 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 opacity-80 sm:opacity-0 group-hover:opacity-100 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                   </button>
-                  <button onclick="deleteStore('${store.id}')" title="ลบลิงก์" class="p-2 text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 opacity-80 sm:opacity-0 group-hover:opacity-100 transition">
+                  <button onclick="deleteStore(decodeURIComponent('${safeJsArg(store.id)}'))" title="ลบลิงก์" class="p-2 text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 opacity-80 sm:opacity-0 group-hover:opacity-100 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                   </button>
                 </div>
@@ -807,7 +793,7 @@
 
             <!-- ปุ่มคัดลอก (บน) และปุ่มเปิดลิงก์ (ล่าง) ยาวเต็มการ์ด ขนาดเท่ากัน -->
             <div class="pt-3 border-t border-zinc-100 dark:border-white/5 flex flex-col gap-2.5">
-              <button onclick="copyToClipboard('${escapeHtml(store.url)}', 'ลิงก์')" class="w-full py-3 px-4 text-xs sm:text-sm font-semibold rounded-2xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 transition flex items-center justify-center gap-2 shadow-sm">
+              <button onclick="copyToClipboard(decodeURIComponent('${safeJsArg(store.url)}'), 'ลิงก์')" class="w-full py-3 px-4 text-xs sm:text-sm font-semibold rounded-2xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 transition flex items-center justify-center gap-2 shadow-sm">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                 <span>คัดลอกลิงก์</span>
               </button>
@@ -873,6 +859,8 @@
       const pinned = document.getElementById('storePinned').checked;
 
       if (!name || !url) return;
+      if (!isSafeHttpUrl(url)) { showToast('URL ต้องขึ้นต้นด้วย http:// หรือ https://', 'error'); return; }
+      if (!categories.includes(category)) { showToast('กรุณาเลือกหมวดหมู่ที่ถูกต้อง', 'error'); return; }
 
       const now = new Date();
       const timeStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
@@ -922,13 +910,15 @@
         categories,
         stores
       };
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
+      const objectUrl = URL.createObjectURL(blob);
       const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `storehub_backup_${new Date().toISOString().slice(0,10)}.json`);
+      downloadAnchor.href = objectUrl;
+      downloadAnchor.download = `storehub_backup_${new Date().toISOString().slice(0,10)}.json`;
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
+      URL.revokeObjectURL(objectUrl);
       showToast('ส่งออกข้อมูลสำรองสำเร็จ');
     }
 
@@ -939,15 +929,17 @@
       reader.onload = function(event) {
         try {
           const parsed = JSON.parse(event.target.result);
-          if (parsed.stores && Array.isArray(parsed.stores)) {
-            stores = parsed.stores;
-          }
-          if (parsed.categories && Array.isArray(parsed.categories)) {
-            categories = parsed.categories;
-          }
-          if (parsed.hubInfo) {
-            hubInfo = parsed.hubInfo;
-          }
+          if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('รูปแบบไฟล์ไม่ถูกต้อง');
+          if (!Array.isArray(parsed.stores) || !parsed.stores.every(isValidStore)) throw new Error('รายการลิงก์ไม่ถูกต้อง');
+          if (!Array.isArray(parsed.categories) || !parsed.categories.every(c => typeof c === 'string' && c.trim() && c !== 'ทั้งหมด')) throw new Error('หมวดหมู่ไม่ถูกต้อง');
+          if (!parsed.hubInfo || typeof parsed.hubInfo !== 'object' || Array.isArray(parsed.hubInfo) ||
+              typeof parsed.hubInfo.title !== 'string' || typeof parsed.hubInfo.subtitle !== 'string') throw new Error('ข้อมูลหัวเว็บไม่ถูกต้อง');
+          const nextCategories = [...new Set(parsed.categories)];
+          if (parsed.stores.some(store => !nextCategories.includes(store.category))) throw new Error('มีลิงก์ที่อ้างถึงหมวดหมู่ที่ไม่มีอยู่');
+          // ตรวจครบทุกส่วนก่อน จึงค่อยแทนค่าข้อมูลเดิม
+          stores = parsed.stores;
+          categories = nextCategories;
+          hubInfo = { title: parsed.hubInfo.title, subtitle: parsed.hubInfo.subtitle };
           saveToStorage();
           renderHubInfo();
           renderCategories();
@@ -959,6 +951,7 @@
         }
         e.target.value = '';
       };
+      reader.onerror = function() { e.target.value = ''; showToast('อ่านไฟล์ไม่สำเร็จ', 'error'); };
       reader.readAsText(file);
     }
   </script>
