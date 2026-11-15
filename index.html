@@ -855,11 +855,14 @@
             const modal = document.getElementById('websitePreviewModal');
             const content = document.getElementById('websitePreviewContent');
             const host = new URL(formatUrl(store.url)).hostname;
-            const imageUrl = store.coverImage && isHttpUrl(store.coverImage) ? store.coverImage : getFaviconUrl(store.url);
+            const hasCover = Boolean(store.coverImage && isHttpUrl(store.coverImage));
+            const previewImage = hasCover
+                ? `<img src="${escapeHtml(store.coverImage)}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'">`
+                : `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-950 via-zinc-900 to-purple-950"><img src="${escapeHtml(getFaviconUrl(store.url))}" alt="" class="w-16 h-16 rounded-2xl bg-black/50 p-3" onerror="this.style.display='none'"></div>`;
             content.innerHTML = `
                 <div class="rounded-2xl overflow-hidden border border-white/10 bg-zinc-950">
                     <div class="h-48 sm:h-64 relative bg-gradient-to-br from-cyan-950 via-zinc-900 to-purple-950">
-                        <img src="${escapeHtml(imageUrl)}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        ${previewImage}
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                         <div class="absolute bottom-4 left-5 right-5 flex items-end gap-3">
                             <div class="w-12 h-12 rounded-xl bg-black/60 border border-white/20 flex items-center justify-center text-white text-xl"><i class="${escapeHtml(store.icon || 'fa-solid fa-link')}"></i></div>
