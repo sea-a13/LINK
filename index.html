@@ -1572,11 +1572,12 @@
             const workers = Array.from({ length: Math.min(3, stores.length) }, async () => {
                 while (cursor < stores.length) {
                     const store = stores[cursor++];
+                    const previousStatus = store.linkStatus;
                     const status = await checkSingleLink(store);
                     store.linkStatus = status;
                     store.lastCheckedAt = new Date().toISOString();
                     if (status === 'online') online++;
-                    else if (status === 'broken') { broken++; addLinkNotification('ลิงก์อาจเข้าไม่ได้',store.name+' — ตรวจพบสถานะผิดปกติ',store.id+':'+store.lastCheckedAt); }
+                    else if (status === 'broken') { broken++; if (previousStatus !== 'broken') addLinkNotification('ลิงก์อาจเข้าไม่ได้',store.name+' — ตรวจพบสถานะผิดปกติ',store.id+':broken'); }
                     else unknown++;
                 }
             });
