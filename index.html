@@ -290,10 +290,9 @@
           <article class="rounded-2xl border border-white/10 bg-zinc-900/70 p-4"><div class="flex flex-wrap justify-between gap-2 items-center"><h3 class="text-sm font-semibold"><i class="fa-solid fa-layer-group text-red-400 mr-2"></i>จัดกลุ่มอัจฉริยะ</h3><select id="smartGroupMode" onchange="setSmartGroupMode(this.value)" class="px-3 py-2 rounded-lg bg-zinc-950 border border-white/10 text-xs"><option value="none">ไม่จัดกลุ่ม</option><option value="category">ตามหมวดหมู่</option><option value="tag">ตามแท็ก</option></select></div><p class="mt-2 text-[11px] text-zinc-500">จัดกลุ่มรายการที่แสดงโดยไม่เปลี่ยนข้อมูลต้นฉบับ</p></article>
         </section>
         <!-- Quick Search shortcut -->
-        <section class="max-w-xl mx-auto mb-3 flex justify-end">
-            <button type="button" onclick="openQuickSearch()" class="text-xs text-zinc-400 hover:text-cyan-300 transition flex items-center gap-2">
-                <i class="fa-solid fa-command"></i> ค้นหาด่วน <kbd class="px-1.5 py-0.5 rounded border border-white/15 bg-zinc-900 text-[10px]">Ctrl K</kbd>
-            </button>
+        <section class="max-w-5xl mx-auto mb-3 flex flex-wrap justify-end gap-2">
+            <button type="button" onclick="openDuplicateDetector()" class="px-3 py-2 rounded-xl text-xs text-red-200 bg-red-950/30 border border-red-500/25 hover:bg-red-900/40 transition"><i class="fa-solid fa-copy mr-1.5"></i>ตรวจหาลิงก์ซ้ำ <span id="duplicateCount" class="ml-1 px-1.5 py-0.5 rounded-full bg-red-500/15">0</span></button>
+            <button type="button" onclick="openQuickSearch()" class="px-3 py-2 rounded-xl text-xs text-zinc-200 bg-zinc-900 border border-white/10 hover:border-red-500/40 transition flex items-center gap-2"><i class="fa-solid fa-command text-red-400"></i> Command Palette <kbd class="px-1.5 py-0.5 rounded border border-white/15 bg-zinc-950 text-[10px]">Ctrl K</kbd></button>
         </section>
         <!-- ช่องค้นหาเรียลไทม์ -->
         <section class="max-w-xl mx-auto mb-6">
@@ -453,6 +452,13 @@
             </div>
             <div id="quickSearchResults" class="p-2 max-h-[55vh] overflow-y-auto"></div>
             <div class="px-4 py-2 border-t border-white/10 text-[10px] text-zinc-500">กด Enter เพื่อเปิดลิงก์แรก • Esc เพื่อปิด</div>
+        </div>
+    </div>
+
+    <div id="duplicateDetectorModal" class="fixed inset-0 z-[72] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onclick="if(event.target===this)closeDuplicateDetector()">
+        <div class="w-full max-w-2xl max-h-[85vh] rounded-2xl bg-zinc-900 border border-red-500/20 shadow-2xl overflow-hidden flex flex-col">
+            <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between gap-3"><div><p class="text-[10px] tracking-[.2em] text-red-400 font-semibold">LINK CLEANUP</p><h3 class="text-lg font-bold text-white">Duplicate Detector</h3><p id="duplicateSummary" class="text-xs text-zinc-500 mt-1">กำลังตรวจสอบรายการ...</p></div><button type="button" onclick="closeDuplicateDetector()" class="w-9 h-9 rounded-xl bg-zinc-800 text-zinc-300"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="p-4 overflow-y-auto"><div class="flex flex-wrap items-center justify-between gap-2 mb-3"><p class="text-xs text-zinc-400">ตรวจจาก URL เว็บไซต์, Discord, Telegram และชื่อที่ซ้ำกัน</p><button type="button" onclick="renderDuplicateDetector()" class="px-3 py-2 rounded-lg bg-zinc-800 text-xs text-zinc-200"><i class="fa-solid fa-rotate mr-1"></i>สแกนอีกครั้ง</button></div><div id="duplicateResults" class="space-y-3"></div><p class="mt-4 text-[11px] text-zinc-500">ระบบจะไม่ลบหรือรวมข้อมูลให้อัตโนมัติ คุณสามารถเปิดแก้ไขแต่ละรายการเพื่อตรวจสอบก่อน</p></div>
         </div>
     </div>
 
@@ -739,6 +745,7 @@
         let currentLanguage = 'th';
         let draggedStoreId = '';
         let quickSearchMatches = [];
+        let quickSearchItems = [];
         let quickSearchSelectedIndex = 0;
         const CARD_PREFERENCES_KEY = 'linkhub_card_preferences_v1';
         const BACKUP_HISTORY_KEY = 'linkhub_backup_history_v1';
@@ -763,6 +770,7 @@
             updateBackupHistoryInfo();
             loadLinkInsights();
             renderInsights();
+            renderDuplicateDetectorCount();
             refreshMissingCoverImages();
             registerServiceWorker();
         };
@@ -935,17 +943,14 @@
                 draggedStoreId = '';
             });
             document.addEventListener('keydown', event => {
-                if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
-                    event.preventDefault(); openQuickSearch();
-                } else if (event.key === 'Escape') {
-                    closeQuickSearch(); closeWebsitePreview();
-                } else if (document.getElementById('quickSearchModal').classList.contains('flex') && event.key === 'Enter') {
-                    event.preventDefault(); openQuickSearchMatch();
-                } else if (document.getElementById('quickSearchModal').classList.contains('flex') && event.key === 'ArrowDown') {
-                    event.preventDefault(); moveQuickSearchSelection(1);
-                } else if (document.getElementById('quickSearchModal').classList.contains('flex') && event.key === 'ArrowUp') {
-                    event.preventDefault(); moveQuickSearchSelection(-1);
-                }
+                const paletteOpen = document.getElementById('quickSearchModal').classList.contains('flex');
+                const typing = event.target && (event.target.matches('input,textarea,select') || event.target.isContentEditable);
+                if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); openQuickSearch(); }
+                else if (event.key === 'Escape') { closeQuickSearch(); closeWebsitePreview(); closeDuplicateDetector(); }
+                else if (paletteOpen && event.key === 'Enter') { event.preventDefault(); openQuickSearchMatch(); }
+                else if (paletteOpen && event.key === 'ArrowDown') { event.preventDefault(); moveQuickSearchSelection(1); }
+                else if (paletteOpen && event.key === 'ArrowUp') { event.preventDefault(); moveQuickSearchSelection(-1); }
+                else if (!typing && !event.ctrlKey && !event.metaKey && event.key === '/') { event.preventDefault(); openQuickSearch(); }
             });
         }
 
@@ -1007,58 +1012,84 @@
             if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
         }
 
+        function getQuickCommands() {
+            return [
+                {type:'command',id:'add',label:'เพิ่มลิงก์ใหม่',description:'สร้างรายการเว็บไซต์ใหม่',icon:'fa-solid fa-plus',keywords:'add create new link',run:function(){openModal();}},
+                {type:'command',id:'favorites',label:'แสดงรายการโปรด',description:'กรองให้เหลือเฉพาะรายการโปรด',icon:'fa-solid fa-heart',keywords:'favorite favourites',run:function(){favoritesOnly=true;selectedCategory='ทั้งหมด';renderCategories();renderStores();}},
+                {type:'command',id:'all',label:'แสดงลิงก์ทั้งหมด',description:'ล้างตัวกรองและแสดงทุกรายการ',icon:'fa-solid fa-layer-group',keywords:'all reset filter',run:function(){favoritesOnly=false;selectedCategory='ทั้งหมด';document.getElementById('searchInput').value='';renderCategories();renderStores();}},
+                {type:'command',id:'duplicates',label:'ตรวจหาลิงก์ซ้ำ',description:'ค้นหา URL หรือชื่อที่ซ้ำกัน',icon:'fa-solid fa-copy',keywords:'duplicate duplicates scan',run:function(){openDuplicateDetector();}},
+                {type:'command',id:'check',label:'ตรวจสอบสถานะลิงก์',description:'เริ่มตรวจสอบลิงก์ทั้งหมด',icon:'fa-solid fa-link',keywords:'check status broken online',run:function(){checkAllLinks();}},
+                {type:'command',id:'categories',label:'จัดการหมวดหมู่',description:'เพิ่ม แก้ไข หรือลบหมวดหมู่',icon:'fa-solid fa-folder-gear',keywords:'category categories folder',run:function(){openCategoryModal(false);}},
+                {type:'command',id:'theme',label:'สลับธีม Light / Dark',description:'เปลี่ยนโหมดการแสดงผล',icon:'fa-solid fa-circle-half-stroke',keywords:'theme appearance light dark',run:function(){toggleTheme();}}
+            ];
+        }
         function openQuickSearch() {
-            const modal = document.getElementById('quickSearchModal');
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-            const input = document.getElementById('quickSearchInput');
-            input.value = '';
-            renderQuickSearchResults();
-            setTimeout(() => input.focus(), 0);
+            const modal=document.getElementById('quickSearchModal');modal.classList.remove('hidden');modal.classList.add('flex');
+            const input=document.getElementById('quickSearchInput');input.value='';renderQuickSearchResults();setTimeout(function(){input.focus();},0);
+        }
+        function closeQuickSearch(){const modal=document.getElementById('quickSearchModal');if(modal){modal.classList.add('hidden');modal.classList.remove('flex');}}
+        function renderQuickSearchResults(){
+            const query=document.getElementById('quickSearchInput').value.trim().toLowerCase();
+            const commands=getQuickCommands().filter(function(item){return !query||[item.label,item.description,item.keywords].join(' ').toLowerCase().includes(query);});
+            const links=stores.filter(function(store){return !query||[store.name,store.url,store.category,store.description].concat(normalizeTags(store.tags),[store.discordUrl,store.telegramUrl]).some(function(value){return String(value||'').toLowerCase().includes(query);});})
+                .sort(function(a,b){return new Date(b.lastVisited||b.createdAt||0)-new Date(a.lastVisited||a.createdAt||0);}).slice(0,10)
+                .map(function(store){return {type:'store',id:store.id,label:store.name,description:(store.category||'ไม่มีหมวดหมู่')+' · '+store.url,icon:store.icon||'fa-solid fa-link'};});
+            quickSearchItems=commands.concat(links);quickSearchMatches=links;quickSearchSelectedIndex=0;
+            const container=document.getElementById('quickSearchResults');
+            container.innerHTML=quickSearchItems.length?quickSearchItems.map(function(item,index){
+                return '<button type="button" data-quick-index="'+index+'" aria-selected="'+(index===0)+'" onclick="activateQuickSearchItem('+index+')" class="quick-result w-full text-left p-3 rounded-xl border border-transparent flex items-center gap-3 hover:bg-zinc-800 transition"><span class="w-9 h-9 shrink-0 rounded-lg bg-red-500/10 flex items-center justify-center text-red-300"><i class="'+escapeHtml(item.icon)+'"></i></span><span class="min-w-0 flex-1"><span class="block text-sm text-zinc-100 truncate">'+escapeHtml(item.label)+'</span><span class="block text-[11px] text-zinc-500 truncate">'+escapeHtml(item.description)+'</span></span><span class="text-[10px] text-zinc-600">'+(item.type==='command'?'คำสั่ง':'เว็บไซต์')+'</span></button>';
+            }).join(''):'<p class="p-6 text-center text-sm text-zinc-500">ไม่พบคำสั่งหรือเว็บไซต์ที่ตรงกัน</p>';
+            if(query&&commands.length)container.insertAdjacentHTML('afterbegin','<p class="px-3 pt-2 pb-1 text-[10px] uppercase tracking-widest text-red-400">คำสั่ง</p>');
+        }
+        function activateQuickSearchItem(index){
+            const item=quickSearchItems[index];if(!item)return;closeQuickSearch();
+            if(item.type==='command'){item.run();return;}openQuickSearchStore(item.id);
+        }
+        function moveQuickSearchSelection(step){
+            if(!quickSearchItems.length)return;quickSearchSelectedIndex=(quickSearchSelectedIndex+step+quickSearchItems.length)%quickSearchItems.length;
+            document.querySelectorAll('[data-quick-index]').forEach(function(button){const active=Number(button.dataset.quickIndex)===quickSearchSelectedIndex;button.setAttribute('aria-selected',String(active));if(active)button.scrollIntoView({block:'nearest'});});
+        }
+        function openQuickSearchMatch(){activateQuickSearchItem(quickSearchSelectedIndex);}
+        function openQuickSearchStore(storeId){
+            const store=stores.find(function(item){return item.id===storeId;});if(!store)return;
+            recordStoreVisit(storeId);window.open(formatUrl(store.url),'_blank','noopener');
         }
 
-        function closeQuickSearch() {
-            const modal = document.getElementById('quickSearchModal');
-            if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+        function renderDuplicateDetectorCount(){
+            const el=document.getElementById('duplicateCount');if(el){const groups=collectDuplicateGroups();el.textContent=String(groups.urls.length+groups.names.length);}
         }
-
-        function renderQuickSearchResults() {
-            const query = document.getElementById('quickSearchInput').value.trim().toLowerCase();
-            quickSearchMatches = stores.filter(store => !query ||
-                [store.name, store.url, store.category, store.description, ...(store.tags || [])].some(value => String(value || '').toLowerCase().includes(query)))
-                .sort((a,b) => new Date(b.lastVisited || b.createdAt || 0) - new Date(a.lastVisited || a.createdAt || 0)).slice(0,12);
-            quickSearchSelectedIndex = 0;
-            const container = document.getElementById('quickSearchResults');
-            container.innerHTML = quickSearchMatches.length ? quickSearchMatches.map((store,index) => `
-                <button type="button" data-quick-index="${index}" aria-selected="${index===0}" onclick="openQuickSearchStore('${escapeJsString(store.id)}')" class="quick-result w-full text-left p-3 rounded-xl border border-transparent flex items-center gap-3 hover:bg-zinc-800 transition">
-                    <span class="w-9 h-9 rounded-lg bg-zinc-800 flex items-center justify-center text-cyan-300"><i class="${escapeHtml(store.icon || 'fa-solid fa-link')}"></i></span>
-                    <span class="min-w-0 flex-1"><span class="block text-sm text-zinc-100 truncate">${escapeHtml(store.name)}</span><span class="block text-[11px] text-zinc-500 truncate">${escapeHtml(store.category)} · ${escapeHtml(store.url)}</span></span>
-                    <i class="fa-solid fa-arrow-up-right-from-square text-xs text-zinc-500"></i>
-                </button>`).join('') : '<p class="p-6 text-center text-sm text-zinc-500">ไม่พบลิงก์ที่ตรงกัน</p>';
-        }
-
-        function moveQuickSearchSelection(step) {
-            if (!quickSearchMatches.length) return;
-            quickSearchSelectedIndex = (quickSearchSelectedIndex + step + quickSearchMatches.length) % quickSearchMatches.length;
-            document.querySelectorAll('[data-quick-index]').forEach(button => {
-                const active = Number(button.dataset.quickIndex) === quickSearchSelectedIndex;
-                button.setAttribute('aria-selected', String(active));
-                if (active) button.scrollIntoView({ block:'nearest' });
+        function collectDuplicateGroups(){
+            const urlMap=new Map(),nameMap=new Map();
+            stores.forEach(function(store){
+                const seen=new Set();
+                [['เว็บไซต์',store.url],['Discord',store.discordUrl],['Telegram',store.telegramUrl]].forEach(function(pair){
+                    const label=pair[0],value=pair[1];if(!value)return;
+                    const key=normalizeComparableUrl(value);if(!key||seen.has(key))return;seen.add(key);
+                    if(!urlMap.has(key))urlMap.set(key,[]);urlMap.get(key).push({store:store,label:label,url:value});
+                });
+                const name=String(store.name||'').trim().toLocaleLowerCase();
+                if(name){if(!nameMap.has(name))nameMap.set(name,[]);nameMap.get(name).push(store);}
             });
+            const urls=Array.from(urlMap.entries()).filter(function(entry){return new Set(entry[1].map(function(item){return item.store.id;})).size>1;}).map(function(entry){return {type:'url',key:entry[0],items:entry[1]};});
+            const names=Array.from(nameMap.entries()).filter(function(entry){return entry[1].length>1;}).map(function(entry){return {type:'name',key:entry[0],items:entry[1]};});
+            return {urls:urls,names:names};
         }
-
-        function openQuickSearchMatch() {
-            const match = quickSearchMatches[quickSearchSelectedIndex];
-            if (match) openQuickSearchStore(match.id);
+        function openDuplicateDetector(){const modal=document.getElementById('duplicateDetectorModal');modal.classList.remove('hidden');modal.classList.add('flex');renderDuplicateDetector();}
+        function closeDuplicateDetector(){const modal=document.getElementById('duplicateDetectorModal');if(modal){modal.classList.add('hidden');modal.classList.remove('flex');}}
+        function renderDuplicateDetector(){
+            const groups=collectDuplicateGroups(),total=groups.urls.length+groups.names.length;
+            document.getElementById('duplicateSummary').textContent=total?'พบกลุ่มที่ควรตรวจสอบ '+total+' กลุ่ม · URL ซ้ำ '+groups.urls.length+' · ชื่อซ้ำ '+groups.names.length:'ไม่พบรายการซ้ำที่ตรวจจับได้';
+            const container=document.getElementById('duplicateResults');
+            const renderGroup=function(group){
+                const isUrl=group.type==='url';
+                const items=isUrl?group.items:group.items.map(function(store){return {store:store,label:'ชื่อรายการ',url:store.url};});
+                return '<section class="rounded-xl border border-white/10 bg-zinc-950/60 p-3"><div class="flex items-center justify-between gap-2 mb-2"><span class="text-xs font-semibold '+(isUrl?'text-red-300':'text-amber-300')+'">'+(isUrl?'URL ซ้ำกัน':'ชื่อซ้ำกัน')+'</span><span class="text-[10px] text-zinc-500">'+items.length+' รายการ</span></div>'+
+                    items.map(function(item){return '<div class="flex items-center gap-2 py-2 border-t border-white/5"><div class="min-w-0 flex-1"><p class="text-sm text-zinc-100 truncate">'+escapeHtml(item.store.name)+'</p><p class="text-[11px] text-zinc-500 truncate">'+escapeHtml(item.label)+' · '+escapeHtml(item.url||'')+'</p></div><button type="button" onclick="editDuplicateStore(\''+escapeJsString(item.store.id)+'\')" class="shrink-0 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-red-500/15 text-xs text-zinc-200">ตรวจสอบ</button></div>';}).join('')+'</section>';
+            };
+            container.innerHTML=total?groups.urls.concat(groups.names).map(renderGroup).join(''):'<div class="py-10 text-center"><i class="fa-solid fa-circle-check text-3xl text-emerald-400"></i><p class="mt-3 text-sm text-zinc-200">ไม่พบลิงก์ซ้ำ</p><p class="mt-1 text-xs text-zinc-500">รายการของคุณดูเรียบร้อยดี</p></div>';
+            renderDuplicateDetectorCount();
         }
-
-        function openQuickSearchStore(storeId) {
-            const store = stores.find(item => item.id === storeId);
-            if (!store) return;
-            store.lastVisited = new Date().toISOString();
-            try { localStorage.setItem('private_link_hub_v3', JSON.stringify(stores)); } catch (error) { console.warn(error); }
-            closeQuickSearch();
-            window.open(formatUrl(store.url), '_blank', 'noopener');
-        }
+        function editDuplicateStore(storeId){closeDuplicateDetector();openModal(storeId);}
 
         function loadAccentTheme() {
             let saved = 'red';
@@ -1886,9 +1917,10 @@
                 return;
             }
 
-            const duplicate = stores.find(store => store.id !== id && normalizeComparableUrl(store.url) === normalizeComparableUrl(url));
+            const submittedLinks = [url, discordUrl, telegramUrl].filter(Boolean).map(normalizeComparableUrl);
+            const duplicate = stores.find(store => store.id !== id && [store.url, store.discordUrl, store.telegramUrl].filter(Boolean).some(existing => submittedLinks.includes(normalizeComparableUrl(existing))));
             if (duplicate) {
-                showToast('ลิงก์นี้มีอยู่แล้วในรายการ: ' + duplicate.name, 'error');
+                showToast('พบ URL ซ้ำกับรายการ: ' + duplicate.name + ' กรุณาตรวจสอบก่อนบันทึก', 'error');
                 return;
             }
 
@@ -1932,6 +1964,7 @@
             }
 
             renderStores();
+            renderDuplicateDetectorCount();
             closeModal();
 
             const savedStore = stores.find(store => store.id === (id || stores[0]?.id));
