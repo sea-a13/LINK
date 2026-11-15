@@ -1131,14 +1131,14 @@
             try {
                 const parsed = new URL(formatUrl(value));
                 parsed.hash = '';
-                if (parsed.pathname.length > 1) parsed.pathname = parsed.pathname.replace(/\\/+$/, '');
-                return parsed.href.replace(/\\/$/, '').toLowerCase();
+                if (parsed.pathname.length > 1) parsed.pathname = parsed.pathname.replace(/\/+$/, '');
+                return parsed.href.replace(/\/$/, '').toLowerCase();
             } catch { return String(value || '').trim().toLowerCase(); }
         }
 
         function normalizeTags(value) {
             const source = Array.isArray(value) ? value : (typeof value === 'string' ? value.split(',') : []);
-            return [...new Set(source.map(tag => String(tag).trim().replace(/\\s+/g, ' ').slice(0, 30)).filter(Boolean))].slice(0, 12);
+            return [...new Set(source.map(tag => String(tag) .trim().replace(/\s+/g, ' ').slice(0, 30)).filter(Boolean))].slice(0, 12);
         }
 
         function toggleFavoritesFilter() {
