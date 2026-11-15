@@ -282,6 +282,13 @@
             </p>
         </header>
 
+        <!-- LINK Insights -->
+        <section id="linkInsights" class="max-w-5xl mx-auto mb-7 space-y-4">
+          <div class="flex items-center justify-between gap-2"><div><p class="text-xs tracking-[.2em] text-red-400 font-semibold">LINK OVERVIEW</p><h2 class="text-lg font-bold">Dashboard สถิติ</h2></div><button onclick="renderInsights()" class="px-3 py-2 rounded-lg bg-zinc-900 border border-white/10 text-xs">อัปเดต</button></div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3"><article class="rounded-2xl border border-white/10 bg-zinc-900/80 p-4"><p class="text-xs text-zinc-500">ลิงก์ทั้งหมด</p><p id="statTotal" class="mt-2 text-2xl font-bold">0</p></article><article class="rounded-2xl border border-white/10 bg-zinc-900/80 p-4"><p class="text-xs text-zinc-500">รายการโปรด</p><p id="statFavorites" class="mt-2 text-2xl font-bold text-rose-300">0</p></article><article class="rounded-2xl border border-white/10 bg-zinc-900/80 p-4"><p class="text-xs text-zinc-500">ใช้งานได้</p><p id="statOnline" class="mt-2 text-2xl font-bold text-emerald-300">0</p></article><article class="rounded-2xl border border-white/10 bg-zinc-900/80 p-4"><p class="text-xs text-zinc-500">อาจเข้าไม่ได้</p><p id="statBroken" class="mt-2 text-2xl font-bold text-red-300">0</p></article></div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3"><article class="rounded-2xl border border-white/10 bg-zinc-900/70 p-4"><div class="flex justify-between mb-3"><h3 class="text-sm font-semibold"><i class="fa-solid fa-clock-rotate-left text-red-400 mr-2"></i>ประวัติการใช้งานล่าสุด</h3><span id="historyCount" class="text-[11px] text-zinc-500">0 รายการ</span></div><div id="recentActivity" class="space-y-2 text-xs text-zinc-400">ยังไม่มีประวัติ</div></article><article class="rounded-2xl border border-white/10 bg-zinc-900/70 p-4"><div class="flex justify-between mb-3"><h3 class="text-sm font-semibold"><i class="fa-solid fa-bell text-red-400 mr-2"></i>การแจ้งเตือน</h3><button onclick="clearLinkNotifications()" class="text-[11px] text-zinc-500">ล้าง</button></div><div id="linkNotifications" class="space-y-2 text-xs text-zinc-400">ยังไม่มีการแจ้งเตือน</div></article></div>
+          <article class="rounded-2xl border border-white/10 bg-zinc-900/70 p-4"><div class="flex flex-wrap justify-between gap-2 items-center"><h3 class="text-sm font-semibold"><i class="fa-solid fa-layer-group text-red-400 mr-2"></i>จัดกลุ่มอัจฉริยะ</h3><select id="smartGroupMode" onchange="setSmartGroupMode(this.value)" class="px-3 py-2 rounded-lg bg-zinc-950 border border-white/10 text-xs"><option value="none">ไม่จัดกลุ่ม</option><option value="category">ตามหมวดหมู่</option><option value="tag">ตามแท็ก</option></select></div><p class="mt-2 text-[11px] text-zinc-500">จัดกลุ่มรายการที่แสดงโดยไม่เปลี่ยนข้อมูลต้นฉบับ</p></article>
+        </section>
         <!-- Quick Search shortcut -->
         <section class="max-w-xl mx-auto mb-3 flex justify-end">
             <button type="button" onclick="openQuickSearch()" class="text-xs text-zinc-400 hover:text-cyan-300 transition flex items-center gap-2">
@@ -737,6 +744,8 @@
         const BACKUP_HISTORY_KEY = 'linkhub_backup_history_v1';
         const MAX_BACKUP_HISTORY = 10;
         let cardPreferences = { showCover: true, showDescription: true, showUrl: true, shape: 'rounded' };
+        const LINK_ACTIVITY_KEY = 'linkhub_activity_v1', LINK_NOTIFICATIONS_KEY = 'linkhub_notifications_v1', LINK_GROUP_MODE_KEY = 'linkhub_group_mode_v1';
+        let linkActivity = [], linkNotifications = [], smartGroupMode = 'none';
 
         // เริ่มต้นทำงานเมื่อโหลดหน้าเว็บเสร็จ
         window.onload = function () {
@@ -752,6 +761,8 @@
             loadDisplayPreferences();
             loadCardPreferences();
             updateBackupHistoryInfo();
+            loadLinkInsights();
+            renderInsights();
             refreshMissingCoverImages();
             registerServiceWorker();
         };
@@ -1332,6 +1343,7 @@
 
         // --- แสดงผลการ์ดลิงก์ทั้งหมด ---
         function renderStores() {
+            renderInsights();
             const grid = document.getElementById('storeGrid');
             const emptyState = document.getElementById('emptyState');
             const countText = document.getElementById('itemCountText');
@@ -1339,6 +1351,7 @@
             const clearBtn = document.getElementById('clearSearchBtn');
 
             const query = searchInput.value.trim().toLowerCase();
+            const searchTerms = parseSmartSearch(query);
             const favoriteCount = stores.filter(store => store.favorite).length;
             const favButton = document.getElementById('favoritesFilterBtn');
             if (favButton) {
@@ -1351,17 +1364,14 @@
             const filtered = stores.filter(store => {
                 const matchCat = selectedCategory === "ทั้งหมด" || store.category === selectedCategory;
                 const matchFavorite = !favoritesOnly || Boolean(store.favorite);
-                const matchQuery = !query ||
-                    String(store.name || '').toLowerCase().includes(query) ||
-                    String(store.description || '').toLowerCase().includes(query) ||
-                    String(store.category || '').toLowerCase().includes(query) ||
-                    (Array.isArray(store.tags) && store.tags.some(tag => String(tag).toLowerCase().includes(query))) ||
-                    String(store.url || '').toLowerCase().includes(query) || String(store.discordUrl || '').toLowerCase().includes(query) || String(store.telegramUrl || '').toLowerCase().includes(query);
+                const fields = { name:String(store.name||'').toLowerCase(), desc:String(store.description||'').toLowerCase(), cat:String(store.category||'').toLowerCase(), tag:normalizeTags(store.tags).join(' ').toLowerCase(), url:[store.url,store.discordUrl,store.telegramUrl].join(' ').toLowerCase() };
+                const matchQuery = searchTerms.every(term => term.field ? fields[term.field].includes(term.value) : Object.values(fields).some(value => value.includes(term.value)));
                 return matchCat && matchQuery && matchFavorite;
             });
 
             const sortMode = document.getElementById('sortSelect')?.value || 'newest';
-            filtered.sort((a, b) => {
+            if (query) filtered.sort((a,b) => smartSearchScore(b, searchTerms) - smartSearchScore(a, searchTerms));
+            else filtered.sort((a, b) => {
                 if (sortMode === 'oldest') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
                 if (sortMode === 'name-asc') return a.name.localeCompare(b.name, 'th');
                 if (sortMode === 'name-desc') return b.name.localeCompare(a.name, 'th');
@@ -1389,7 +1399,11 @@
 
             emptyState.classList.add('hidden');
 
+            let previousGroup = '';
             grid.innerHTML = filtered.map(store => {
+                const groupName = smartGroupMode === 'category' ? (store.category || 'ไม่ระบุหมวดหมู่') : smartGroupMode === 'tag' ? (normalizeTags(store.tags)[0] || 'ไม่มีแท็ก') : '';
+                const groupHeader = smartGroupMode !== 'none' && groupName !== previousGroup ? '<div class="col-span-full pt-3 pb-1 text-xs font-bold text-red-300 border-b border-red-500/20"><i class="fa-solid fa-folder-open mr-2"></i>' + escapeHtml(groupName) + '</div>' : '';
+                previousGroup = groupName;
                 const style = COLOR_STYLES[store.color] || COLOR_STYLES.cyan;
                 const safeUrl = formatUrl(store.url);
                 const faviconUrl = getFaviconUrl(safeUrl);
@@ -1423,6 +1437,7 @@
 
                 const canDrag = sortMode === 'manual' && !query && !favoritesOnly && selectedCategory === 'ทั้งหมด';
                 return `
+                    ${groupHeader}
                     <article data-store-card="${escapeHtml(store.id)}" ${canDrag ? 'draggable="true"' : ''} class="group relative ${cardShapeClass} bg-zinc-900/80 border border-white/10 ${style.glow} p-5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 shadow-xl ${canDrag ? 'cursor-grab' : ''}">
                         <div>
                             ${coverPanel}
@@ -1476,13 +1491,30 @@
 
 
         function recordStoreVisit(storeId) {
-            const store = stores.find(item => item.id === storeId);
-            if (!store) return;
-            store.lastVisited = new Date().toISOString();
-            // Persist visit history without interrupting navigation if storage is unavailable.
-            try { localStorage.setItem('private_link_hub_v3', JSON.stringify(stores)); }
-            catch (error) { console.warn('Could not save visit history:', error); }
+            const store = stores.find(item => item.id === storeId); if (!store) return;
+            const at = new Date().toISOString(); store.lastVisited = at; store.visitCount = Math.max(0,Number(store.visitCount)||0)+1;
+            linkActivity.unshift({id:store.id,name:store.name,url:store.url,at}); linkActivity=linkActivity.slice(0,30);
+            try { localStorage.setItem('private_link_hub_v3',JSON.stringify(stores)); localStorage.setItem(LINK_ACTIVITY_KEY,JSON.stringify(linkActivity)); } catch(error) { console.warn('Could not save visit history:',error); }
+            renderInsights();
         }
+
+        function loadLinkInsights() {
+            try { linkActivity=JSON.parse(localStorage.getItem(LINK_ACTIVITY_KEY)||'[]'); } catch { linkActivity=[]; }
+            try { linkNotifications=JSON.parse(localStorage.getItem(LINK_NOTIFICATIONS_KEY)||'[]'); } catch { linkNotifications=[]; }
+            try { const mode=localStorage.getItem(LINK_GROUP_MODE_KEY); smartGroupMode=['none','category','tag'].includes(mode)?mode:'none'; } catch { smartGroupMode='none'; }
+            const select=document.getElementById('smartGroupMode'); if(select) select.value=smartGroupMode;
+        }
+        function renderInsights() {
+            const put=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=String(value);};
+            put('statTotal',stores.length); put('statFavorites',stores.filter(s=>s.favorite).length); put('statOnline',stores.filter(s=>s.linkStatus==='online').length); put('statBroken',stores.filter(s=>s.linkStatus==='broken').length); put('historyCount',linkActivity.length+' รายการ');
+            const h=document.getElementById('recentActivity'); if(h) h.innerHTML=linkActivity.slice(0,6).map(x=>'<div class="flex justify-between gap-2"><span class="truncate"><i class="fa-solid fa-arrow-up-right-from-square text-red-400 mr-2"></i>'+escapeHtml(x.name)+'</span><time class="shrink-0 text-[10px] text-zinc-500">'+escapeHtml(new Date(x.at).toLocaleString('th-TH'))+'</time></div>').join('')||'ยังไม่มีประวัติ';
+            const n=document.getElementById('linkNotifications'); if(n) n.innerHTML=linkNotifications.slice(0,6).map(x=>'<div class="rounded-lg bg-zinc-950/70 p-2"><p class="text-zinc-200">'+escapeHtml(x.title)+'</p><p class="text-zinc-500 mt-1">'+escapeHtml(x.message)+'</p><time class="text-[10px] text-zinc-600">'+escapeHtml(new Date(x.at).toLocaleString('th-TH'))+'</time></div>').join('')||'ยังไม่มีการแจ้งเตือน';
+        }
+        function addLinkNotification(title,message,key) { if(linkNotifications.some(x=>x.key===key))return; linkNotifications.unshift({title,message,key,at:new Date().toISOString()}); linkNotifications=linkNotifications.slice(0,20); try{localStorage.setItem(LINK_NOTIFICATIONS_KEY,JSON.stringify(linkNotifications));}catch(e){} renderInsights(); }
+        function clearLinkNotifications(){linkNotifications=[];try{localStorage.setItem(LINK_NOTIFICATIONS_KEY,'[]');}catch(e){}renderInsights();showToast('ล้างการแจ้งเตือนแล้ว');}
+        function setSmartGroupMode(mode){smartGroupMode=['none','category','tag'].includes(mode)?mode:'none';try{localStorage.setItem(LINK_GROUP_MODE_KEY,smartGroupMode);}catch(e){}renderStores();}
+        function parseSmartSearch(query){return (String(query||'').match(/(?:[^\s"]+|"[^"]*")+/g)||[]).map(token=>{const m=token.match(/^(name|cat|category|tag|url|desc):(.+)$/i);const map={name:'name',cat:'cat',category:'cat',tag:'tag',url:'url',desc:'desc'};return{field:m?map[m[1].toLowerCase()]:'',value:(m?m[2]:token).replace(/^"|"$/g,'').toLowerCase()};}).filter(x=>x.value);}
+        function smartSearchScore(store,terms){const f={name:String(store.name||'').toLowerCase(),cat:String(store.category||'').toLowerCase(),tag:normalizeTags(store.tags).join(' ').toLowerCase(),desc:String(store.description||'').toLowerCase(),url:[store.url,store.discordUrl,store.telegramUrl].join(' ').toLowerCase()};return terms.reduce((s,t)=>s+(t.field?(f[t.field].includes(t.value)?(t.field==='name'?5:3):0):Object.entries(f).reduce((n,[k,v])=>n+(v.includes(t.value)?(k==='name'?5:k==='cat'||k==='tag'?3:1):0),0)),0);}
 
         function normalizeComparableUrl(value) {
             try {
@@ -1540,7 +1572,7 @@
                     store.linkStatus = status;
                     store.lastCheckedAt = new Date().toISOString();
                     if (status === 'online') online++;
-                    else if (status === 'broken') broken++;
+                    else if (status === 'broken') { broken++; addLinkNotification('ลิงก์อาจเข้าไม่ได้',store.name+' — ตรวจพบสถานะผิดปกติ',store.id+':'+store.lastCheckedAt); }
                     else unknown++;
                 }
             });
@@ -1548,6 +1580,7 @@
             saveToStorage();
             renderStores();
             if (button) { button.disabled = false; button.innerHTML = '<i class="fa-solid fa-link mr-1"></i>ตรวจสอบลิงก์'; }
+            renderInsights();
             showToast('เสร็จแล้ว: ใช้งานได้ ' + online + ' • อาจเสีย ' + broken + ' • ตรวจสอบไม่ได้ ' + unknown, broken ? 'error' : 'success');
         }
 
