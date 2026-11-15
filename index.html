@@ -123,7 +123,7 @@
             html, body, nav, #storeGrid article { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
         }
         :root { --hub-accent: #ef4444; --hub-accent-soft: rgba(239,68,68,.16); }
-        html[data-accent="red"] { --hub-accent:#ef4444; --hub-accent-soft:rgba(239,68,68,.16); }
+        html[data-accent="red"]:not([data-accent="cyan"]) { --hub-accent:#ef4444; --hub-accent-soft:rgba(239,68,68,.16); }
         html[data-accent="purple"] { --hub-accent:#a855f7; --hub-accent-soft:rgba(168,85,247,.16); }
         html[data-accent="emerald"] { --hub-accent:#10b981; --hub-accent-soft:rgba(16,185,129,.16); }
         html[data-accent="rose"] { --hub-accent:#f43f5e; --hub-accent-soft:rgba(244,63,94,.16); }
@@ -145,60 +145,60 @@
 
         /* Red-and-black default theme: cover legacy hard-coded cyan, purple and blue accents,
            including classes emitted dynamically by the card/category renderers. */
-        html[data-accent="red"] {
+        html[data-accent="red"]:not([data-accent="cyan"]) {
             --hub-accent:#ef4444;
             --hub-accent-soft:rgba(239,68,68,.16);
         }
-        html[data-accent="red"] [class*="text-cyan-"],
-        html[data-accent="red"] [class*="text-purple-"],
-        html[data-accent="red"] [class*="text-blue-"] { color:#f87171 !important; }
-        html[data-accent="red"] [class*="bg-cyan-"],
-        html[data-accent="red"] [class*="bg-purple-"],
-        html[data-accent="red"] [class*="bg-blue-"] { background-color:rgba(239,68,68,.16) !important; }
-        html[data-accent="red"] [class*="border-cyan-"],
-        html[data-accent="red"] [class*="border-purple-"],
-        html[data-accent="red"] [class*="border-blue-"] { border-color:rgba(239,68,68,.55) !important; }
-        html[data-accent="red"] [class*="from-cyan-"],
-        html[data-accent="red"] [class*="from-purple-"],
-        html[data-accent="red"] [class*="from-blue-"],
-        html[data-accent="red"] [class*="to-cyan-"],
-        html[data-accent="red"] [class*="to-purple-"],
-        html[data-accent="red"] [class*="to-blue-"],
-        html[data-accent="red"] [class*="via-cyan-"],
-        html[data-accent="red"] [class*="via-purple-"],
-        html[data-accent="red"] [class*="via-blue-"] {
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="text-cyan-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="text-purple-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="text-blue-"] { color:#f87171 !important; }
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="bg-cyan-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="bg-purple-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="bg-blue-"] { background-color:rgba(239,68,68,.16) !important; }
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="border-cyan-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="border-purple-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="border-blue-"] { border-color:rgba(239,68,68,.55) !important; }
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="from-cyan-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="from-purple-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="from-blue-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="to-cyan-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="to-purple-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="to-blue-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="via-cyan-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="via-purple-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="via-blue-"] {
             background-image:linear-gradient(135deg,#ef4444 0%,#991b1b 55%,#450a0a 100%) !important;
         }
-        html[data-accent="red"] [class*="shadow-cyan-"],
-        html[data-accent="red"] [class*="shadow-purple-"],
-        html[data-accent="red"] [class*="shadow-blue-"] { --tw-shadow-color:rgba(239,68,68,.22) !important; }
-        html[data-accent="red"] [class*="ring-cyan-"],
-        html[data-accent="red"] [class*="ring-purple-"],
-        html[data-accent="red"] [class*="ring-blue-"] { --tw-ring-color:rgba(239,68,68,.25) !important; }
-        html[data-accent="red"] [class*="focus:border-cyan-"]:focus,
-        html[data-accent="red"] [class*="focus:border-purple-"]:focus,
-        html[data-accent="red"] [class*="focus:border-blue-"]:focus { border-color:#ef4444 !important; }
-        html[data-accent="red"] [class*="focus:ring-cyan-"]:focus,
-        html[data-accent="red"] [class*="focus:ring-purple-"]:focus,
-        html[data-accent="red"] [class*="focus:ring-blue-"]:focus { --tw-ring-color:rgba(239,68,68,.25) !important; }
-        html[data-accent="red"] [class*="hover:text-cyan-"]:hover,
-        html[data-accent="red"] [class*="hover:text-purple-"]:hover,
-        html[data-accent="red"] [class*="hover:text-blue-"]:hover { color:#f87171 !important; }
-        html[data-accent="red"] [class*="hover:bg-cyan-"]:hover,
-        html[data-accent="red"] [class*="hover:bg-purple-"]:hover,
-        html[data-accent="red"] [class*="hover:bg-blue-"]:hover { background-color:rgba(239,68,68,.24) !important; }
-        html[data-accent="red"] [class*="hover:from-cyan-"]:hover,
-        html[data-accent="red"] [class*="hover:from-purple-"]:hover,
-        html[data-accent="red"] [class*="hover:from-blue-"]:hover,
-        html[data-accent="red"] [class*="hover:to-cyan-"]:hover,
-        html[data-accent="red"] [class*="hover:to-purple-"]:hover,
-        html[data-accent="red"] [class*="hover:to-blue-"]:hover {
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="shadow-cyan-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="shadow-purple-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="shadow-blue-"] { --tw-shadow-color:rgba(239,68,68,.22) !important; }
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="ring-cyan-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="ring-purple-"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="ring-blue-"] { --tw-ring-color:rgba(239,68,68,.25) !important; }
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="focus:border-cyan-"]:focus,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="focus:border-purple-"]:focus,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="focus:border-blue-"]:focus { border-color:#ef4444 !important; }
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="focus:ring-cyan-"]:focus,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="focus:ring-purple-"]:focus,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="focus:ring-blue-"]:focus { --tw-ring-color:rgba(239,68,68,.25) !important; }
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="hover:text-cyan-"]:hover,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="hover:text-purple-"]:hover,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="hover:text-blue-"]:hover { color:#f87171 !important; }
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="hover:bg-cyan-"]:hover,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="hover:bg-purple-"]:hover,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="hover:bg-blue-"]:hover { background-color:rgba(239,68,68,.24) !important; }
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="hover:from-cyan-"]:hover,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="hover:from-purple-"]:hover,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="hover:from-blue-"]:hover,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="hover:to-cyan-"]:hover,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="hover:to-purple-"]:hover,
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="hover:to-blue-"]:hover {
             background-image:linear-gradient(135deg,#f87171 0%,#b91c1c 55%,#450a0a 100%) !important;
         }
-        html[data-accent="red"] [class*="bg-cyan-600"],
-        html[data-accent="red"] [class*="bg-purple-600"],
-        html[data-accent="red"] [class*="bg-blue-600"] { background-color:#dc2626 !important; }
-        html[data-accent="red"] .text-transparent[class*="bg-clip-text"] {
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="bg-cyan-600"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="bg-purple-600"],
+        html[data-accent="red"]:not([data-accent="cyan"]) [class*="bg-blue-600"] { background-color:#dc2626 !important; }
+        html[data-accent="red"]:not([data-accent="cyan"]) .text-transparent[class*="bg-clip-text"] {
             background-image:linear-gradient(90deg,#f87171,#ffffff,#b91c1c) !important;
         }
 
