@@ -53,6 +53,44 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(34, 211, 238, 0.6);
         }
+
+        /* Directory display modes */
+        #storeGrid[data-view="list"] {
+            display: flex !important;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        #storeGrid[data-view="list"] article {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(230px, 280px);
+            align-items: center;
+            gap: 1rem;
+        }
+        #storeGrid[data-view="list"] article > div:first-child { min-width: 0; }
+        #storeGrid[data-view="list"] article .relative.h-36 {
+            height: 112px;
+            margin: 0 0 0.75rem;
+            border-radius: 0.9rem;
+        }
+        #storeGrid[data-view="list"] article .grid.grid-cols-4 { align-self: center; }
+        #storeGrid[data-view="compact"] {
+            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            gap: 0.85rem !important;
+        }
+        #storeGrid[data-view="compact"] article { padding: 0.85rem; border-radius: 1rem; }
+        #storeGrid[data-view="compact"] article .relative.h-36 { display: none; }
+        #storeGrid[data-view="compact"] article p { display: none; }
+        #storeGrid[data-view="compact"] article .grid.grid-cols-4 { gap: 0.35rem; }
+        #storeGrid[data-view="compact"] article .grid.grid-cols-4 button,
+        #storeGrid[data-view="compact"] article .grid.grid-cols-4 a { min-height: 2.25rem; padding-left: 0.35rem; padding-right: 0.35rem; }
+        @media (max-width: 1024px) {
+            #storeGrid[data-view="compact"] { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+        }
+        @media (max-width: 640px) {
+            #storeGrid[data-view="list"] article { grid-template-columns: 1fr; }
+            #storeGrid[data-view="list"] article .grid.grid-cols-4 { width: 100%; }
+            #storeGrid[data-view="compact"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen font-sans selection:bg-cyan-500/30 selection:text-cyan-200 relative overflow-x-hidden">
@@ -157,6 +195,25 @@
             <button type="button" onclick="checkAllLinks()" class="min-h-11 px-4 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-300"><i class="fa-solid fa-link mr-1"></i>ตรวจสอบลิงก์</button>
           </div>
           <p class="mt-2 text-[11px] text-zinc-500">ค้นหาได้จากชื่อ คำอธิบาย URL และช่องทางติดต่อ</p>
+        </section>
+
+        <!-- View and language preferences -->
+        <section class="max-w-5xl mx-auto mb-6 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-zinc-500" data-i18n="มุมมอง">มุมมอง</span>
+                <div class="inline-flex rounded-xl border border-white/10 bg-zinc-900 p-1 gap-1">
+                    <button type="button" data-view-button="card" onclick="setViewMode('card')" class="px-3 py-2 rounded-lg text-xs text-zinc-300 hover:bg-zinc-800 transition"><i class="fa-solid fa-grip mr-1"></i><span data-i18n="การ์ด">การ์ด</span></button>
+                    <button type="button" data-view-button="list" onclick="setViewMode('list')" class="px-3 py-2 rounded-lg text-xs text-zinc-300 hover:bg-zinc-800 transition"><i class="fa-solid fa-list mr-1"></i><span data-i18n="รายการ">รายการ</span></button>
+                    <button type="button" data-view-button="compact" onclick="setViewMode('compact')" class="px-3 py-2 rounded-lg text-xs text-zinc-300 hover:bg-zinc-800 transition"><i class="fa-solid fa-table-cells mr-1"></i><span data-i18n="กะทัดรัด">กะทัดรัด</span></button>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-zinc-500" data-i18n="ภาษา">ภาษา</span>
+                <div class="inline-flex rounded-xl border border-white/10 bg-zinc-900 p-1 gap-1">
+                    <button type="button" onclick="setLanguage('th')" data-language-button="th" class="px-3 py-2 rounded-lg text-xs text-zinc-300 hover:bg-zinc-800 transition">ไทย</button>
+                    <button type="button" onclick="setLanguage('en')" data-language-button="en" class="px-3 py-2 rounded-lg text-xs text-zinc-300 hover:bg-zinc-800 transition">English</button>
+                </div>
+            </div>
         </section>
 
         <!-- แถบกรองหมวดหมู่ + ปุ่มเพิ่ม/จัดการหมวดหมู่ -->
@@ -477,6 +534,8 @@
         let favoritesOnly = false;
         let editingCategoryIndex = -1;
         let toastTimeout = null;
+        let currentViewMode = 'card';
+        let currentLanguage = 'th';
 
         // เริ่มต้นทำงานเมื่อโหลดหน้าเว็บเสร็จ
         window.onload = function () {
@@ -487,6 +546,7 @@
             renderIconPicker();
             renderStores();
             bindDynamicActions();
+            loadDisplayPreferences();
             refreshMissingCoverImages();
             registerServiceWorker();
         };
@@ -634,6 +694,7 @@
         function renderHubInfo() {
             document.getElementById('hubTitle').textContent = hubInfo.title || DEFAULT_HUB_INFO.title;
             document.getElementById('hubSubtitle').textContent = hubInfo.subtitle || DEFAULT_HUB_INFO.subtitle;
+            translatePage();
         }
 
         // สร้างแถบปุ่มกรองหมวดหมู่
@@ -653,6 +714,7 @@
                     </button>
                 `;
             }).join('');
+            translatePage();
         }
 
         // อัปเดตตัวเลือกหมวดหมู่ใน Dropdown
@@ -925,6 +987,7 @@
                     document.getElementById('emptyTitle').textContent = "ยังไม่มีลิงก์ในรายการ";
                     document.getElementById('emptyDesc').textContent = "เริ่มต้นสร้างคลังลิงก์ส่วนตัวของคุณได้ทันที ข้อมูลทั้งหมดจะถูกเก็บไว้ในเบราว์เซอร์ของคุณคนเดียว";
                 }
+                translatePage();
                 return;
             }
 
@@ -1003,6 +1066,7 @@
                     </article>
                 `;
             }).join('');
+            translatePage();
         }
 
 
@@ -1058,6 +1122,123 @@
         function clearSearch() {
             document.getElementById('searchInput').value = '';
             renderStores();
+        }
+
+        // --- Display preferences: view mode and language ---
+        function loadDisplayPreferences() {
+            try {
+                const savedView = localStorage.getItem('linkhub_view_mode');
+                const savedLanguage = localStorage.getItem('linkhub_language');
+                currentViewMode = ['card', 'list', 'compact'].includes(savedView) ? savedView : 'card';
+                currentLanguage = savedLanguage === 'en' ? 'en' : 'th';
+            } catch (error) {
+                currentViewMode = 'card';
+                currentLanguage = 'th';
+            }
+            applyViewMode();
+            applyLanguage();
+        }
+
+        function setViewMode(mode) {
+            if (!['card', 'list', 'compact'].includes(mode)) return;
+            currentViewMode = mode;
+            try { localStorage.setItem('linkhub_view_mode', mode); } catch (error) {
+                console.warn('Could not save view preference:', error);
+            }
+            applyViewMode();
+        }
+
+        function applyViewMode() {
+            const grid = document.getElementById('storeGrid');
+            if (grid) grid.dataset.view = currentViewMode;
+            document.querySelectorAll('[data-view-button]').forEach(button => {
+                const active = button.dataset.viewButton === currentViewMode;
+                button.classList.toggle('bg-cyan-500/20', active);
+                button.classList.toggle('text-cyan-300', active);
+                button.classList.toggle('text-zinc-300', !active);
+                button.setAttribute('aria-pressed', String(active));
+            });
+        }
+
+        const UI_TRANSLATIONS = {
+            'มุมมอง': 'View', 'การ์ด': 'Cards', 'รายการ': 'List', 'กะทัดรัด': 'Compact',
+            'ภาษา': 'Language', 'สำรองข้อมูล': 'Backup', 'นำเข้า': 'Import',
+            'เพิ่มลิงก์': 'Add link', 'ส่วนตัว': 'Private', 'คลังรวมลิงก์ร้านค้าส่วนตัว': 'Private link directory',
+            'รวมลิงก์ร้านค้าและโปรแกรมสำคัญของคุณไว้ในที่เดียว เข้าถึงไว ปลอดภัย ดูได้คนเดียว': 'Keep your useful websites and software links organized in one place.',
+            'ค้นหาชื่อร้าน, คำอธิบาย, หรือหมวดหมู่...': 'Search names, descriptions, or categories...',
+            'เพิ่มล่าสุด': 'Newest', 'เพิ่มเก่าสุด': 'Oldest', 'ชื่อ A–Z': 'Name A–Z', 'ชื่อ Z–A': 'Name Z–A', 'หมวดหมู่': 'Category',
+            'รายการโปรด': 'Favorites', 'ตรวจสอบลิงก์': 'Check links',
+            'ค้นหาได้จากชื่อ คำอธิบาย URL และช่องทางติดต่อ': 'Search by name, description, URL, and contact links',
+            'เพิ่มหมวดหมู่': 'Add category', 'จัดการหมวดหมู่': 'Manage categories',
+            'บันทึกอัตโนมัติในเครื่อง': 'Saved locally on this device',
+            'แสดง 0 รายการ': 'Showing 0 items',
+            'ยังไม่มีลิงก์ในรายการ': 'No links yet',
+            'ไม่พบลิงก์ที่ตรงกับการค้นหา': 'No matching links found',
+            'ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่ \'ทั้งหมด\' เพื่อดูรายการทั้งหมดของคุณ': 'Try another search or choose “All” to see every link.',
+            'เริ่มต้นสร้างคลังลิงก์ส่วนตัวของคุณได้ทันที ข้อมูลทั้งหมดจะถูกเก็บไว้ในเบราว์เซอร์ของคุณคนเดียว': 'Start building your link directory. Your data stays in this browser.',
+            'เพิ่มลิงก์แรกของคุณ': 'Add your first link',
+            'เพิ่มลิงก์ใหม่': 'Add a new link', 'แก้ไขข้อมูลลิงก์': 'Edit link',
+            'ชื่อร้าน / ชื่อโปรแกรม *': 'Website / software name *', 'ลิงก์เว็บไซต์ (URL) *': 'Website URL *',
+            'ธีมสีการ์ด': 'Card theme', 'ลิงก์ Discord (ไม่บังคับ)': 'Discord link (optional)',
+            'ลิงก์ Telegram (ไม่บังคับ)': 'Telegram link (optional)', 'คำอธิบาย': 'Description',
+            'ภาพปก (URL รูปภาพ ไม่บังคับ)': 'Cover image URL (optional)',
+            'ไม่มีคำอธิบายเพิ่มเติม': 'No description available', 'เปิดลิงก์': 'Open link',
+            'คัดลอก': 'Copy', 'แก้ไข': 'Edit', 'ลบ': 'Delete',
+            'ฟ้านีออน (Cyan)': 'Neon cyan', 'ม่วงนีออน (Purple)': 'Neon purple',
+            'เขียวมรกต (Emerald)': 'Emerald green', 'ส้มทอง (Amber)': 'Amber gold',
+            'ชมพูแดง (Rose)': 'Rose pink',
+            'ยกเลิก': 'Cancel', 'บันทึก': 'Save', 'ยืนยันลบ': 'Confirm delete',
+            'ดำเนินการสำเร็จ': 'Done', 'คัดลอกลิงก์': 'Copy link'
+        };
+        const UI_TRANSLATIONS_REVERSE = Object.fromEntries(
+            Object.entries(UI_TRANSLATIONS).map(([thai, english]) => [english, thai])
+        );
+
+        function translatePage() {
+            const dictionary = currentLanguage === 'en' ? UI_TRANSLATIONS : UI_TRANSLATIONS_REVERSE;
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            let node;
+            while ((node = walker.nextNode())) {
+                const original = node.nodeValue;
+                const trimmed = original.trim();
+                if (!trimmed) continue;
+                const translated = dictionary[trimmed];
+                if (translated) {
+                    node.nodeValue = original.replace(trimmed, translated);
+                }
+            }
+            document.querySelectorAll('[placeholder], [title], [aria-label]').forEach(element => {
+                ['placeholder', 'title', 'aria-label'].forEach(attribute => {
+                    const value = element.getAttribute(attribute);
+                    if (!value) return;
+                    const translated = dictionary[value];
+                    if (translated) element.setAttribute(attribute, translated);
+                });
+            });
+        }
+
+        function setLanguage(language) {
+            if (!['th', 'en'].includes(language)) return;
+            currentLanguage = language;
+            try { localStorage.setItem('linkhub_language', language); } catch (error) {
+                console.warn('Could not save language preference:', error);
+            }
+            applyLanguage();
+            renderHubInfo();
+            renderCategories();
+            renderStores();
+        }
+
+        function applyLanguage() {
+            document.documentElement.lang = currentLanguage;
+            document.querySelectorAll('[data-language-button]').forEach(button => {
+                const active = button.dataset.languageButton === currentLanguage;
+                button.classList.toggle('bg-cyan-500/20', active);
+                button.classList.toggle('text-cyan-300', active);
+                button.classList.toggle('text-zinc-300', !active);
+                button.setAttribute('aria-pressed', String(active));
+            });
+            translatePage();
         }
 
         // --- เลือกไอคอน ---
