@@ -143,6 +143,65 @@
         #storeGrid article.drag-over { outline:2px dashed var(--hub-accent); outline-offset:4px; }
         #quickSearchModal .quick-result[aria-selected="true"] { background:var(--hub-accent-soft); border-color:var(--hub-accent); }
 
+        /* Red-and-black default theme: cover legacy hard-coded cyan, purple and blue accents,
+           including classes emitted dynamically by the card/category renderers. */
+        html[data-accent="red"] {
+            --hub-accent:#ef4444;
+            --hub-accent-soft:rgba(239,68,68,.16);
+        }
+        html[data-accent="red"] [class*="text-cyan-"],
+        html[data-accent="red"] [class*="text-purple-"],
+        html[data-accent="red"] [class*="text-blue-"] { color:#f87171 !important; }
+        html[data-accent="red"] [class*="bg-cyan-"],
+        html[data-accent="red"] [class*="bg-purple-"],
+        html[data-accent="red"] [class*="bg-blue-"] { background-color:rgba(239,68,68,.16) !important; }
+        html[data-accent="red"] [class*="border-cyan-"],
+        html[data-accent="red"] [class*="border-purple-"],
+        html[data-accent="red"] [class*="border-blue-"] { border-color:rgba(239,68,68,.55) !important; }
+        html[data-accent="red"] [class*="from-cyan-"],
+        html[data-accent="red"] [class*="from-purple-"],
+        html[data-accent="red"] [class*="from-blue-"],
+        html[data-accent="red"] [class*="to-cyan-"],
+        html[data-accent="red"] [class*="to-purple-"],
+        html[data-accent="red"] [class*="to-blue-"],
+        html[data-accent="red"] [class*="via-cyan-"],
+        html[data-accent="red"] [class*="via-purple-"],
+        html[data-accent="red"] [class*="via-blue-"] {
+            background-image:linear-gradient(135deg,#ef4444 0%,#991b1b 55%,#450a0a 100%) !important;
+        }
+        html[data-accent="red"] [class*="shadow-cyan-"],
+        html[data-accent="red"] [class*="shadow-purple-"],
+        html[data-accent="red"] [class*="shadow-blue-"] { --tw-shadow-color:rgba(239,68,68,.22) !important; }
+        html[data-accent="red"] [class*="ring-cyan-"],
+        html[data-accent="red"] [class*="ring-purple-"],
+        html[data-accent="red"] [class*="ring-blue-"] { --tw-ring-color:rgba(239,68,68,.25) !important; }
+        html[data-accent="red"] [class*="focus:border-cyan-"]:focus,
+        html[data-accent="red"] [class*="focus:border-purple-"]:focus,
+        html[data-accent="red"] [class*="focus:border-blue-"]:focus { border-color:#ef4444 !important; }
+        html[data-accent="red"] [class*="focus:ring-cyan-"]:focus,
+        html[data-accent="red"] [class*="focus:ring-purple-"]:focus,
+        html[data-accent="red"] [class*="focus:ring-blue-"]:focus { --tw-ring-color:rgba(239,68,68,.25) !important; }
+        html[data-accent="red"] [class*="hover:text-cyan-"]:hover,
+        html[data-accent="red"] [class*="hover:text-purple-"]:hover,
+        html[data-accent="red"] [class*="hover:text-blue-"]:hover { color:#f87171 !important; }
+        html[data-accent="red"] [class*="hover:bg-cyan-"]:hover,
+        html[data-accent="red"] [class*="hover:bg-purple-"]:hover,
+        html[data-accent="red"] [class*="hover:bg-blue-"]:hover { background-color:rgba(239,68,68,.24) !important; }
+        html[data-accent="red"] [class*="hover:from-cyan-"]:hover,
+        html[data-accent="red"] [class*="hover:from-purple-"]:hover,
+        html[data-accent="red"] [class*="hover:from-blue-"]:hover,
+        html[data-accent="red"] [class*="hover:to-cyan-"]:hover,
+        html[data-accent="red"] [class*="hover:to-purple-"]:hover,
+        html[data-accent="red"] [class*="hover:to-blue-"]:hover {
+            background-image:linear-gradient(135deg,#f87171 0%,#b91c1c 55%,#450a0a 100%) !important;
+        }
+        html[data-accent="red"] [class*="bg-cyan-600"],
+        html[data-accent="red"] [class*="bg-purple-600"],
+        html[data-accent="red"] [class*="bg-blue-600"] { background-color:#dc2626 !important; }
+        html[data-accent="red"] .text-transparent[class*="bg-clip-text"] {
+            background-image:linear-gradient(90deg,#f87171,#ffffff,#b91c1c) !important;
+        }
+
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen font-sans selection:bg-red-500/30 selection:text-red-200 relative overflow-x-hidden">
