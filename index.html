@@ -347,6 +347,32 @@
             </div>
         </section>
 
+        <!-- ปรับแต่งการ์ดเว็บไซต์ -->
+        <section class="max-w-5xl mx-auto mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-zinc-900/50 p-3 sm:p-4">
+            <span class="text-xs font-semibold text-zinc-300"><i class="fa-solid fa-sliders mr-1.5 text-red-400"></i>ปรับแต่งการ์ด</span>
+            <label class="flex items-center gap-2 text-xs text-zinc-400">ภาพปก
+                <select id="cardCoverSelect" onchange="updateCardPreference('showCover', this.value === 'show')" class="px-2.5 py-2 rounded-lg bg-zinc-950 border border-white/10 text-zinc-200">
+                    <option value="show">แสดง</option><option value="hide">ซ่อน</option>
+                </select>
+            </label>
+            <label class="flex items-center gap-2 text-xs text-zinc-400">รายละเอียด
+                <select id="cardDescriptionSelect" onchange="updateCardPreference('showDescription', this.value === 'show')" class="px-2.5 py-2 rounded-lg bg-zinc-950 border border-white/10 text-zinc-200">
+                    <option value="show">แสดง</option><option value="hide">ซ่อน</option>
+                </select>
+            </label>
+            <label class="flex items-center gap-2 text-xs text-zinc-400">URL
+                <select id="cardUrlSelect" onchange="updateCardPreference('showUrl', this.value === 'show')" class="px-2.5 py-2 rounded-lg bg-zinc-950 border border-white/10 text-zinc-200">
+                    <option value="show">แสดง</option><option value="hide">ซ่อน</option>
+                </select>
+            </label>
+            <label class="flex items-center gap-2 text-xs text-zinc-400">รูปทรง
+                <select id="cardShapeSelect" onchange="updateCardPreference('shape', this.value)" class="px-2.5 py-2 rounded-lg bg-zinc-950 border border-white/10 text-zinc-200">
+                    <option value="rounded">ขอบมน</option><option value="square">เหลี่ยม</option>
+                </select>
+            </label>
+            <button type="button" onclick="resetCardPreferences()" class="ml-auto px-3 py-2 rounded-lg border border-white/10 bg-zinc-950 text-xs text-zinc-400 hover:text-white">คืนค่า</button>
+        </section>
+
         <!-- แถบกรองหมวดหมู่ + ปุ่มเพิ่ม/จัดการหมวดหมู่ -->
         <section class="max-w-5xl mx-auto mb-8">
             <div class="flex items-center gap-3 overflow-x-auto no-scrollbar pb-3 justify-start sm:justify-center">
@@ -376,6 +402,16 @@
                 บันทึกอัตโนมัติในเครื่อง
             </span>
         </div>
+
+        <!-- Advanced backup and restore -->
+        <section class="max-w-5xl mx-auto mb-6 flex flex-wrap items-center gap-2 rounded-2xl border border-red-500/20 bg-red-950/10 p-3">
+            <div class="mr-auto min-w-[180px]">
+                <p class="text-xs font-semibold text-zinc-200"><i class="fa-solid fa-shield-halved mr-1.5 text-red-400"></i>สำรองข้อมูลขั้นสูง</p>
+                <p id="backupHistoryInfo" class="mt-1 text-[11px] text-zinc-500">สำรองข้อมูลพร้อมกู้คืนเวอร์ชันก่อนหน้า</p>
+            </div>
+            <button type="button" onclick="exportData()" class="px-3 py-2 rounded-lg bg-red-600/15 border border-red-500/30 text-xs text-red-200 hover:bg-red-600/25"><i class="fa-solid fa-file-export mr-1"></i>สำรองตอนนี้</button>
+            <button type="button" onclick="restoreLatestBackup()" class="px-3 py-2 rounded-lg bg-zinc-900 border border-white/10 text-xs text-zinc-300 hover:text-white"><i class="fa-solid fa-clock-rotate-left mr-1"></i>กู้คืนล่าสุด</button>
+        </section>
 
         <!-- ตารางแสดงการ์ดลิงก์ร้านค้า -->
         <section id="storeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-7">
@@ -697,6 +733,10 @@
         let draggedStoreId = '';
         let quickSearchMatches = [];
         let quickSearchSelectedIndex = 0;
+        const CARD_PREFERENCES_KEY = 'linkhub_card_preferences_v1';
+        const BACKUP_HISTORY_KEY = 'linkhub_backup_history_v1';
+        const MAX_BACKUP_HISTORY = 10;
+        let cardPreferences = { showCover: true, showDescription: true, showUrl: true, shape: 'rounded' };
 
         // เริ่มต้นทำงานเมื่อโหลดหน้าเว็บเสร็จ
         window.onload = function () {
@@ -710,6 +750,8 @@
             bindSmartInteractions();
             loadAccentTheme();
             loadDisplayPreferences();
+            loadCardPreferences();
+            updateBackupHistoryInfo();
             refreshMissingCoverImages();
             registerServiceWorker();
         };
@@ -1351,7 +1393,14 @@
                 const style = COLOR_STYLES[store.color] || COLOR_STYLES.cyan;
                 const safeUrl = formatUrl(store.url);
                 const faviconUrl = getFaviconUrl(safeUrl);
-                const coverPanel = store.coverImage && isHttpUrl(store.coverImage)
+                const cardShapeClass = cardPreferences.shape === 'square' ? 'rounded-xl' : 'rounded-3xl';
+                const statusMeta = {
+                    online: { label: 'ใช้งานได้', cls: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25', icon: 'fa-circle-check' },
+                    broken: { label: 'อาจเข้าไม่ได้', cls: 'bg-red-500/10 text-red-300 border-red-500/25', icon: 'fa-triangle-exclamation' },
+                    unknown: { label: 'ตรวจสอบไม่ได้', cls: 'bg-amber-500/10 text-amber-300 border-amber-500/25', icon: 'fa-circle-question' }
+                }[store.linkStatus];
+                const statusBadge = statusMeta ? '<span title="ตรวจล่าสุด: ' + escapeHtml(store.lastCheckedAt ? new Date(store.lastCheckedAt).toLocaleString('th-TH') : 'ไม่ทราบเวลา') + '" class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full border text-[10px] ' + statusMeta.cls + '"><i class="fa-solid ' + statusMeta.icon + '"></i>' + statusMeta.label + '</span>' : '';
+                const coverPanel = cardPreferences.showCover && store.coverImage && isHttpUrl(store.coverImage)
                     ? `
                         <div class="relative h-36 -mx-5 -mt-5 mb-4 overflow-hidden bg-zinc-950">
                             <img src="${escapeHtml(store.coverImage)}" alt="ภาพปก ${escapeHtml(store.name)}" loading="lazy" referrerpolicy="no-referrer"
@@ -1364,17 +1413,17 @@
                             <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-zinc-950/80 to-transparent pointer-events-none"></div>
                         </div>
                     `
-                    : `
+                    : cardPreferences.showCover ? `
                         <div class="relative h-36 -mx-5 -mt-5 mb-4 overflow-hidden bg-gradient-to-br from-cyan-950 via-zinc-900 to-purple-950 flex items-center justify-center">
                             <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,#22d3ee,transparent_45%),radial-gradient(circle_at_80%_80%,#a855f7,transparent_45%)]"></div>
                             ${faviconUrl ? `<img src="${escapeHtml(faviconUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer" class="relative w-12 h-12 rounded-xl bg-zinc-950/70 p-2 shadow-lg" onerror="this.classList.add('hidden')">` : ''}
                             <span class="absolute bottom-2 left-3 text-[10px] tracking-widest uppercase text-white/40">${store.coverLoading ? 'กำลังดึงภาพปก...' : 'Website preview'}</span>
                         </div>
-                    `;
+                    ` : '';
 
                 const canDrag = sortMode === 'manual' && !query && !favoritesOnly && selectedCategory === 'ทั้งหมด';
                 return `
-                    <article data-store-card="${escapeHtml(store.id)}" ${canDrag ? 'draggable="true"' : ''} class="group relative rounded-3xl bg-zinc-900/80 border border-white/10 ${style.glow} p-5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 shadow-xl ${canDrag ? 'cursor-grab' : ''}">
+                    <article data-store-card="${escapeHtml(store.id)}" ${canDrag ? 'draggable="true"' : ''} class="group relative ${cardShapeClass} bg-zinc-900/80 border border-white/10 ${style.glow} p-5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 shadow-xl ${canDrag ? 'cursor-grab' : ''}">
                         <div>
                             ${coverPanel}
                             <!-- ส่วนบนการ์ด: ไอคอน + ชื่อร้าน + ป้ายหมวดหมู่ -->
@@ -1389,19 +1438,18 @@
                                     <h3 class="text-base font-semibold text-white truncate group-hover:text-cyan-300 transition">
                                         ${escapeHtml(store.name)}
                                     </h3>
+                                    ${statusBadge}
                                     ${Array.isArray(store.tags) && store.tags.length ? `<div class="flex flex-wrap gap-1 mt-1.5">${store.tags.slice(0,5).map(tag => `<span class="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[10px]">${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
                                 </div>
                             </div>
 
                             <!-- คำอธิบาย -->
-                            <p class="text-xs sm:text-sm text-zinc-400 line-clamp-2 min-h-[2.5rem] mb-3">
+                            ${cardPreferences.showDescription ? `<p class="text-xs sm:text-sm text-zinc-400 line-clamp-2 min-h-[2.5rem] mb-3">
                                 ${store.description ? escapeHtml(store.description) : '<span class="text-zinc-600 italic">ไม่มีคำอธิบายเพิ่มเติม</span>'}
-                            </p>
-
-                            <!-- แถบแสดง URL -->
-                            <div class="px-3 py-2 rounded-xl bg-zinc-950/90 border border-white/5 text-[11px] text-zinc-400 truncate mb-4 font-mono">
+                            </p>` : ''}
+                            ${cardPreferences.showUrl ? `<div class="px-3 py-2 rounded-xl bg-zinc-950/90 border border-white/5 text-[11px] text-zinc-400 truncate mb-4 font-mono">
                                 <i class="fa-solid fa-globe text-zinc-600 mr-1.5"></i>${escapeHtml(store.url)}
-                            </div>
+                            </div>` : ''}
                         </div>
 
                         <!-- ปุ่มการทำงาน แยกช่องชัดเจน -->
@@ -1472,7 +1520,10 @@
                 const response = await fetch(endpoint, { headers: { 'Accept': 'application/json' }, signal: controller.signal });
                 if (!response.ok) return 'unknown';
                 const result = await response.json();
-                return result && result.status === 'success' ? 'online' : 'broken';
+                const statusCode = Number(result?.data?.statusCode || result?.data?.status_code || 0);
+                if (statusCode >= 400) return 'broken';
+                if (statusCode >= 200 && statusCode < 400) return 'online';
+                return result && result.status === 'success' ? 'online' : 'unknown';
             } catch { return 'unknown'; }
             finally { clearTimeout(timeout); }
         }
@@ -1487,6 +1538,7 @@
                     const store = stores[cursor++];
                     const status = await checkSingleLink(store);
                     store.linkStatus = status;
+                    store.lastCheckedAt = new Date().toISOString();
                     if (status === 'online') online++;
                     else if (status === 'broken') broken++;
                     else unknown++;
@@ -1502,6 +1554,52 @@
         function clearSearch() {
             document.getElementById('searchInput').value = '';
             renderStores();
+        }
+
+        function loadCardPreferences() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(CARD_PREFERENCES_KEY) || '{}');
+                cardPreferences = {
+                    showCover: saved.showCover !== false,
+                    showDescription: saved.showDescription !== false,
+                    showUrl: saved.showUrl !== false,
+                    shape: saved.shape === 'square' ? 'square' : 'rounded'
+                };
+            } catch (error) {
+                cardPreferences = { showCover: true, showDescription: true, showUrl: true, shape: 'rounded' };
+            }
+            syncCardPreferenceControls();
+        }
+
+        function syncCardPreferenceControls() {
+            const controls = {
+                cardCoverSelect: cardPreferences.showCover ? 'show' : 'hide',
+                cardDescriptionSelect: cardPreferences.showDescription ? 'show' : 'hide',
+                cardUrlSelect: cardPreferences.showUrl ? 'show' : 'hide',
+                cardShapeSelect: cardPreferences.shape
+            };
+            Object.entries(controls).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) element.value = value;
+            });
+        }
+
+        function updateCardPreference(key, value) {
+            if (!['showCover', 'showDescription', 'showUrl', 'shape'].includes(key)) return;
+            if (key === 'shape') value = value === 'square' ? 'square' : 'rounded';
+            else value = Boolean(value);
+            cardPreferences[key] = value;
+            try { localStorage.setItem(CARD_PREFERENCES_KEY, JSON.stringify(cardPreferences)); }
+            catch (error) { showToast('บันทึกการตั้งค่าการ์ดไม่สำเร็จ', 'error'); }
+            renderStores();
+        }
+
+        function resetCardPreferences() {
+            cardPreferences = { showCover: true, showDescription: true, showUrl: true, shape: 'rounded' };
+            try { localStorage.setItem(CARD_PREFERENCES_KEY, JSON.stringify(cardPreferences)); } catch (error) {}
+            syncCardPreferenceControls();
+            renderStores();
+            showToast('คืนค่าการปรับแต่งการ์ดแล้ว');
         }
 
         // --- Display preferences: view mode and language ---
@@ -1882,6 +1980,7 @@
                 "ล้างข้อมูลทั้งหมด?",
                 "รายการลิงก์และหมวดหมู่ที่สร้างเองทั้งหมดจะถูกลบออกและกลับสู่ค่าเริ่มต้น",
                 () => {
+                    createBackupSnapshot('before-reset');
                     stores = [];
                     categories = [...DEFAULT_CATEGORIES];
                     selectedCategory = "ทั้งหมด";
@@ -1896,29 +1995,113 @@
             );
         }
 
-        // --- สำรองข้อมูล / นำเข้าข้อมูล JSON ---
+        // --- Advanced backup / restore ---
+        function getBackupHistory() {
+            try {
+                const value = JSON.parse(localStorage.getItem(BACKUP_HISTORY_KEY) || '[]');
+                return Array.isArray(value) ? value.filter(item => item && Array.isArray(item.stores)) : [];
+            } catch { return []; }
+        }
+
+        function updateBackupHistoryInfo() {
+            const info = document.getElementById('backupHistoryInfo');
+            if (!info) return;
+            const history = getBackupHistory();
+            info.textContent = history.length
+                ? `มีจุดกู้คืน ${history.length} ชุด • ล่าสุด ${new Date(history[0].createdAt).toLocaleString('th-TH')}`
+                : 'ยังไม่มีจุดกู้คืน • ระบบจะสร้างสำเนาก่อนนำเข้าหรือล้างข้อมูล';
+        }
+
+        function createBackupSnapshot(reason = 'manual') {
+            const snapshot = {
+                schemaVersion: 2,
+                app: 'LINK',
+                reason,
+                createdAt: new Date().toISOString(),
+                hubInfo: JSON.parse(JSON.stringify(hubInfo)),
+                categories: JSON.parse(JSON.stringify(categories)),
+                stores: JSON.parse(JSON.stringify(stores))
+            };
+            const history = getBackupHistory();
+            history.unshift(snapshot);
+            try {
+                localStorage.setItem(BACKUP_HISTORY_KEY, JSON.stringify(history.slice(0, MAX_BACKUP_HISTORY)));
+                updateBackupHistoryInfo();
+                return true;
+            } catch (error) {
+                showToast('สร้างจุดกู้คืนไม่สำเร็จ พื้นที่จัดเก็บอาจเต็ม', 'error');
+                return false;
+            }
+        }
+
+        function applyBackupData(parsed, successMessage = 'กู้คืนข้อมูลสำเร็จ') {
+            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) || !Array.isArray(parsed.stores)) {
+                throw new Error('Invalid backup structure');
+            }
+            const nextCategories = normalizeCategories(parsed.categories);
+            const nextStores = normalizeStores(parsed.stores, nextCategories);
+            if (parsed.stores.length !== nextStores.length) throw new Error('Some store records are invalid');
+            const nextHubInfo = normalizeHubInfo(parsed.hubInfo);
+            const previous = { stores, categories, hubInfo };
+            stores = nextStores;
+            categories = nextCategories;
+            hubInfo = nextHubInfo;
+            if (!saveToStorage()) {
+                stores = previous.stores;
+                categories = previous.categories;
+                hubInfo = previous.hubInfo;
+                throw new Error('Could not save imported data');
+            }
+            selectedCategory = 'ทั้งหมด';
+            renderHubInfo();
+            renderCategories();
+            renderCategoryDropdown();
+            renderStores();
+            refreshMissingCoverImages();
+            showToast(successMessage);
+        }
+
         function exportData() {
+            createBackupSnapshot('manual-export');
             const data = {
-                hubInfo,
-                categories,
-                stores,
+                schemaVersion: 2,
+                app: 'LINK',
+                hubInfo, categories, stores,
                 exportedAt: new Date().toISOString()
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `my-store-hub-backup-${new Date().toISOString().slice(0, 10)}.json`;
+            a.download = `LINK-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
             a.click();
-            URL.revokeObjectURL(url);
-            showToast("ดาวน์โหลดไฟล์สำรองข้อมูลเรียบร้อย");
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            showToast('ดาวน์โหลดไฟล์สำรองข้อมูลเรียบร้อย');
+        }
+
+        function restoreLatestBackup() {
+            const history = getBackupHistory();
+            if (!history.length) {
+                showToast('ยังไม่มีข้อมูลสำรองให้กู้คืน', 'error');
+                return;
+            }
+            const latest = history[0];
+            if (!confirm('กู้คืนข้อมูลจากจุดสำรองล่าสุด? ข้อมูลปัจจุบันจะถูกแทนที่')) return;
+            createBackupSnapshot('before-restore');
+            try {
+                applyBackupData(latest, 'กู้คืนข้อมูลชุดล่าสุดเรียบร้อย');
+            } catch (error) {
+                console.error('Restore failed:', error);
+                showToast('กู้คืนไม่สำเร็จ ข้อมูลเดิมยังคงอยู่', 'error');
+            }
+            updateBackupHistoryInfo();
         }
 
         function importData(event) {
             const file = event.target.files?.[0];
             if (!file) return;
             if (file.size > 5 * 1024 * 1024) {
-                showToast("ไฟล์ใหญ่เกินไป (จำกัด 5 MB)", "error");
+                showToast('ไฟล์ใหญ่เกินไป (จำกัด 5 MB)', 'error');
                 event.target.value = '';
                 return;
             }
@@ -1929,33 +2112,24 @@
                     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) || !Array.isArray(parsed.stores)) {
                         throw new Error('Invalid backup structure');
                     }
+                    // ตรวจสอบข้อมูลทั้งชุดก่อนสร้าง snapshot หรือเปลี่ยนข้อมูลปัจจุบัน
                     const nextCategories = normalizeCategories(parsed.categories);
                     const nextStores = normalizeStores(parsed.stores, nextCategories);
-                    if (parsed.stores.length !== nextStores.length) {
-                        throw new Error('Some store records are invalid');
-                    }
-                    const nextHubInfo = normalizeHubInfo(parsed.hubInfo);
-                    // เปลี่ยนข้อมูลหลังตรวจสอบทุกส่วนผ่านแล้วเท่านั้น
-                    stores = nextStores;
-                    categories = nextCategories;
-                    hubInfo = nextHubInfo;
-                    selectedCategory = "ทั้งหมด";
-                    saveToStorage();
-                    renderHubInfo();
-                    renderCategories();
-                    renderCategoryDropdown();
-                    renderStores();
-                    refreshMissingCoverImages();
-                    showToast("นำเข้าข้อมูลสำเร็จ!");
+                    if (parsed.stores.length !== nextStores.length) throw new Error('Invalid store records');
+                    normalizeHubInfo(parsed.hubInfo);
+                    if (!confirm('นำเข้าข้อมูลชุดนี้และแทนที่ข้อมูลปัจจุบันใช่หรือไม่? ระบบจะสร้างจุดกู้คืนก่อนนำเข้า')) return;
+                    if (!createBackupSnapshot('before-import')) throw new Error('Could not create rollback snapshot');
+                    applyBackupData(parsed, 'นำเข้าข้อมูลสำเร็จ');
                 } catch (err) {
                     console.error('Import failed:', err);
-                    showToast("ไฟล์สำรองไม่ถูกต้อง หรือมีข้อมูลที่ไม่รองรับ", "error");
+                    showToast('ไฟล์สำรองไม่ถูกต้อง หรือบันทึกข้อมูลไม่สำเร็จ', 'error');
                 } finally {
                     event.target.value = '';
+                    updateBackupHistoryInfo();
                 }
             };
             reader.onerror = () => {
-                showToast("อ่านไฟล์ไม่สำเร็จ", "error");
+                showToast('อ่านไฟล์ไม่สำเร็จ', 'error');
                 event.target.value = '';
             };
             reader.readAsText(file);
@@ -2048,7 +2222,8 @@
                         createdAt: typeof item.createdAt === 'string' && !Number.isNaN(Date.parse(item.createdAt)) ? item.createdAt : new Date().toISOString(),
                         pinned: Boolean(item.pinned),
                         favorite: Boolean(item.favorite),
-                        linkStatus: ["online", "broken", "unknown"].includes(item.linkStatus) ? item.linkStatus : ""
+                        linkStatus: ["online", "broken", "unknown"].includes(item.linkStatus) ? item.linkStatus : "",
+                        lastCheckedAt: typeof item.lastCheckedAt === 'string' && !Number.isNaN(Date.parse(item.lastCheckedAt)) ? item.lastCheckedAt : ''
                     };
                 }).filter(Boolean);
         }
