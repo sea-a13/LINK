@@ -1380,6 +1380,10 @@
                 if (sortMode === 'manual') return stores.indexOf(a) - stores.indexOf(b);
                 return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
             });
+            if (smartGroupMode !== 'none') {
+                const groupKey = store => smartGroupMode === 'category' ? String(store.category || '') : (normalizeTags(store.tags)[0] || '');
+                filtered.sort((a,b) => groupKey(a).localeCompare(groupKey(b), 'th') || a.name.localeCompare(b.name, 'th'));
+            }
             countText.textContent = `แสดง ${filtered.length} รายการ${favoritesOnly ? ' ในรายการโปรด' : ''}${selectedCategory !== "ทั้งหมด" ? ` ในหมวด "${selectedCategory}"` : ""}`;
 
             if (filtered.length === 0) {
