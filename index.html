@@ -131,6 +131,13 @@
         html[data-accent] .accent-surface { background:var(--hub-accent-soft) !important; border-color:var(--hub-accent) !important; }
         html[data-accent] .accent-text { color:var(--hub-accent) !important; }
         html[data-accent] .accent-button { background:var(--hub-accent) !important; }
+        html[data-accent]:not([data-accent="cyan"]) .text-cyan-300,
+        html[data-accent]:not([data-accent="cyan"]) .text-cyan-400 { color:var(--hub-accent) !important; }
+        html[data-accent]:not([data-accent="cyan"]) .bg-cyan-500 { background-color:var(--hub-accent) !important; }
+        html[data-accent]:not([data-accent="cyan"]) .bg-cyan-500\/10,
+        html[data-accent]:not([data-accent="cyan"]) .bg-cyan-500\/20 { background-color:var(--hub-accent-soft) !important; }
+        html[data-accent]:not([data-accent="cyan"]) [class*="border-cyan-500"] { border-color:var(--hub-accent) !important; }
+        html[data-accent]:not([data-accent="cyan"]) .focus\\:border-cyan-500:focus { border-color:var(--hub-accent) !important; }
         #storeGrid article.dragging { opacity:.45; transform:scale(.98); }
         #storeGrid article.drag-over { outline:2px dashed var(--hub-accent); outline-offset:4px; }
         #quickSearchModal .quick-result[aria-selected="true"] { background:var(--hub-accent-soft); border-color:var(--hub-accent); }
