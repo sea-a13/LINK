@@ -227,7 +227,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-[minmax(220px,1fr)_auto_auto] gap-3 lg:gap-4 items-stretch">
             <select id="sortSelect" onchange="renderStores()" aria-label="เรียงลำดับ" class="min-h-12 px-4 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-200 w-full sm:min-w-52">
               <option value="newest">เพิ่มล่าสุด</option><option value="oldest">เพิ่มเก่าสุด</option>
-              <option value="name-asc">ชื่อ A–Z</option><option value="name-desc">ชื่อ Z–A</option><option value="category">หมวดหมู่</option>
+              <option value="name-asc">ชื่อ A–Z</option><option value="name-desc">ชื่อ Z–A</option><option value="category">หมวดหมู่</option><option value="recently-visited">เปิดล่าสุด</option>
             </select>
             <button id="favoritesFilterBtn" type="button" onclick="toggleFavoritesFilter()" aria-pressed="false" class="min-h-12 px-5 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-300 whitespace-nowrap hover:border-rose-400/40 transition"><i class="fa-regular fa-heart mr-1"></i>รายการโปรด <span id="favoriteCount">0</span></button>
             <button type="button" onclick="checkAllLinks()" class="min-h-11 px-4 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-300"><i class="fa-solid fa-link mr-1"></i>ตรวจสอบลิงก์</button>
@@ -390,6 +390,11 @@
                     <p class="text-xs leading-relaxed text-zinc-400">ระบบจะพยายามดึงภาพปกจาก <span class="text-cyan-300 font-mono">og:image</span> ของเว็บไซต์ให้อัตโนมัติ หากเว็บไม่เปิดเผยภาพปก จะใช้ไอคอนเว็บไซต์แทน</p>
                 </div>
 
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1.5">แท็ก (ไม่บังคับ)</label>
+                    <input type="text" id="storeTags" maxlength="200" placeholder="เช่น ฟรี, เครื่องมือ, เกม, สำคัญ" class="w-full px-4 py-2.5 rounded-xl bg-zinc-950 border border-white/10 focus:border-cyan-500 outline-none text-sm text-white">
+                    <p class="mt-1 text-[11px] text-zinc-500">คั่นแต่ละแท็กด้วยเครื่องหมายจุลภาค ระบบจะใช้แท็กในการค้นหาและจัดกลุ่ม</p>
+                </div>
                 <div>
                     <label class="block text-xs font-medium text-zinc-400 mb-1.5">คำอธิบายสั้นๆ (ไม่บังคับ)</label>
                     <textarea id="storeDesc" rows="2" placeholder="รายละเอียดเพิ่มเติม เช่น คีย์แท้ ราคาถูก หรือลิงก์โหลดตัวรัน..." class="w-full px-4 py-2.5 rounded-xl bg-zinc-950 border border-white/10 focus:border-cyan-500 outline-none text-sm text-white resize-none"></textarea>
@@ -711,6 +716,8 @@
                 if (button) selectCategory(button.dataset.category || 'ทั้งหมด');
             });
             storeGrid.addEventListener('click', event => {
+                const openedLink = event.target.closest('[data-open-store]');
+                if (openedLink) recordStoreVisit(openedLink.dataset.openStore || '');
                 const button = event.target.closest('[data-action]');
                 if (!button) return;
                 const { action, id, url } = button.dataset;
@@ -1000,6 +1007,7 @@
                     String(store.name || '').toLowerCase().includes(query) ||
                     String(store.description || '').toLowerCase().includes(query) ||
                     String(store.category || '').toLowerCase().includes(query) ||
+                    (Array.isArray(store.tags) && store.tags.some(tag => String(tag).toLowerCase().includes(query))) ||
                     String(store.url || '').toLowerCase().includes(query) || String(store.discordUrl || '').toLowerCase().includes(query) || String(store.telegramUrl || '').toLowerCase().includes(query);
                 return matchCat && matchQuery && matchFavorite;
             });
@@ -1010,6 +1018,7 @@
                 if (sortMode === 'name-asc') return a.name.localeCompare(b.name, 'th');
                 if (sortMode === 'name-desc') return b.name.localeCompare(a.name, 'th');
                 if (sortMode === 'category') return a.category.localeCompare(b.category, 'th') || a.name.localeCompare(b.name, 'th');
+                if (sortMode === 'recently-visited') return new Date(b.lastVisited || 0) - new Date(a.lastVisited || 0);
                 return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
             });
             countText.textContent = `แสดง ${filtered.length} รายการ${favoritesOnly ? ' ในรายการโปรด' : ''}${selectedCategory !== "ทั้งหมด" ? ` ในหมวด "${selectedCategory}"` : ""}`;
@@ -1072,6 +1081,7 @@
                                     <h3 class="text-base font-semibold text-white truncate group-hover:text-cyan-300 transition">
                                         ${escapeHtml(store.name)}
                                     </h3>
+                                    ${Array.isArray(store.tags) && store.tags.length ? `<div class="flex flex-wrap gap-1 mt-1.5">${store.tags.slice(0,5).map(tag => `<span class="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[10px]">${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
                                 </div>
                             </div>
 
@@ -1088,7 +1098,7 @@
 
                         <!-- ปุ่มการทำงาน แยกช่องชัดเจน -->
                         <div class="grid grid-cols-4 gap-2 pt-3 border-t border-white/5">
-                            <a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" class="col-span-2 min-h-11 px-3 rounded-xl bg-gradient-to-r from-cyan-500/90 to-purple-600/90 hover:from-cyan-400 hover:to-purple-500 text-white font-medium text-xs flex items-center justify-center gap-2 shadow-md shadow-cyan-500/10 transition active:scale-[0.98]">
+                            <a href="${escapeHtml(safeUrl)}" data-open-store="${escapeHtml(store.id)}" target="_blank" rel="noopener noreferrer" class="col-span-2 min-h-11 px-3 rounded-xl bg-gradient-to-r from-cyan-500/90 to-purple-600/90 hover:from-cyan-400 hover:to-purple-500 text-white font-medium text-xs flex items-center justify-center gap-2 shadow-md shadow-cyan-500/10 transition active:scale-[0.98]">
                                 <i class="fa-solid fa-arrow-up-right-from-square"></i><span>เปิดลิงก์</span>
                             </a>
                             <button type="button" data-action="copy-link" data-url="${escapeHtml(safeUrl)}" title="คัดลอกลิงก์" class="min-h-11 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 text-zinc-300 hover:text-cyan-300 text-xs flex items-center justify-center gap-2 transition active:scale-[0.98]"><i class="fa-regular fa-copy"></i><span>คัดลอก</span></button>
@@ -1107,6 +1117,29 @@
             translatePage();
         }
 
+
+        function recordStoreVisit(storeId) {
+            const store = stores.find(item => item.id === storeId);
+            if (!store) return;
+            store.lastVisited = new Date().toISOString();
+            // Persist visit history without interrupting navigation if storage is unavailable.
+            try { localStorage.setItem('private_link_hub_v3', JSON.stringify(stores)); }
+            catch (error) { console.warn('Could not save visit history:', error); }
+        }
+
+        function normalizeComparableUrl(value) {
+            try {
+                const parsed = new URL(formatUrl(value));
+                parsed.hash = '';
+                if (parsed.pathname.length > 1) parsed.pathname = parsed.pathname.replace(/\\/+$/, '');
+                return parsed.href.replace(/\\/$/, '').toLowerCase();
+            } catch { return String(value || '').trim().toLowerCase(); }
+        }
+
+        function normalizeTags(value) {
+            const source = Array.isArray(value) ? value : (typeof value === 'string' ? value.split(',') : []);
+            return [...new Set(source.map(tag => String(tag).trim().replace(/\\s+/g, ' ').slice(0, 30)).filter(Boolean))].slice(0, 12);
+        }
 
         function toggleFavoritesFilter() {
             favoritesOnly = !favoritesOnly;
@@ -1340,12 +1373,14 @@
                 renderCategoryDropdown(store.category);
                 document.getElementById('storeColor').value = store.color || 'cyan';
                 document.getElementById('storeDesc').value = store.description || '';
+                document.getElementById('storeTags').value = normalizeTags(store.tags).join(', ');
                 document.getElementById('storeCoverImage').value = store.coverImage || '';
                 selectIcon(store.icon || 'fa-solid fa-fire');
             } else {
                 title.innerHTML = `<i class="fa-solid fa-link text-cyan-400"></i><span>เพิ่มลิงก์ใหม่</span>`;
                 document.getElementById('storeId').value = '';
                 document.getElementById('storeCoverImage').value = '';
+                document.getElementById('storeTags').value = '';
                 if (selectedCategory !== "ทั้งหมด" && categories.includes(selectedCategory)) {
                     document.getElementById('storeCategory').value = selectedCategory;
                 }
@@ -1376,6 +1411,7 @@
             const color = document.getElementById('storeColor').value;
             const icon = document.getElementById('storeIcon').value;
             const description = document.getElementById('storeDesc').value.trim();
+            const tags = normalizeTags(document.getElementById('storeTags').value);
             const rawCoverImage = document.getElementById('storeCoverImage').value.trim();
             if (rawCoverImage && !isHttpUrl(rawCoverImage)) { showToast('URL ภาพปกไม่ถูกต้อง', 'error'); return; }
             const manualCoverImage = rawCoverImage ? new URL(rawCoverImage).href : '';
@@ -1403,13 +1439,19 @@
                 return;
             }
 
+            const duplicate = stores.find(store => store.id !== id && normalizeComparableUrl(store.url) === normalizeComparableUrl(url));
+            if (duplicate) {
+                showToast('ลิงก์นี้มีอยู่แล้วในรายการ: ' + duplicate.name, 'error');
+                return;
+            }
+
             if (id) {
                 const index = stores.findIndex(s => s.id === id);
                 if (index !== -1) {
                     const oldUrl = stores[index].url;
                     stores[index] = {
                         ...stores[index],
-                        name, url, category, color, icon, description, discordUrl, telegramUrl,
+                        name, url, category, color, icon, description, tags, discordUrl, telegramUrl,
                         coverImage: manualCoverImage || (oldUrl === url ? (stores[index].coverImage || '') : ''),
                         coverCheckedUrl: oldUrl === url ? (stores[index].coverCheckedUrl || '') : '',
                         coverLoading: false
@@ -1425,6 +1467,7 @@
                     color,
                     icon,
                     description,
+                    tags,
                     discordUrl,
                     telegramUrl,
                     coverImage: manualCoverImage,
@@ -1686,6 +1729,8 @@
                     return {
                         id, name, url, category, color, icon,
                         description: typeof item.description === 'string' ? item.description.slice(0, 500) : '',
+                        tags: normalizeTags(item.tags),
+                        lastVisited: typeof item.lastVisited === 'string' && !Number.isNaN(Date.parse(item.lastVisited)) ? item.lastVisited : '',
                         discordUrl: isHttpUrl(item.discordUrl) ? new URL(item.discordUrl).href : '',
                         telegramUrl: isHttpUrl(item.telegramUrl) ? new URL(item.telegramUrl).href : '',
                         coverImage, coverCheckedUrl, coverLoading: false,
