@@ -91,6 +91,38 @@
             #storeGrid[data-view="list"] article .grid.grid-cols-4 { width: 100%; }
             #storeGrid[data-view="compact"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
         }
+
+        /* Light theme overrides: keep existing layout and components intact */
+        html.light body { background-color: #f4f7fb !important; color: #172033 !important; }
+        html.light body::selection { background: rgba(6, 182, 212, .22); color: #164e63; }
+        html.light nav { background: rgba(255,255,255,.88) !important; border-color: #dbe3ee !important; }
+        html.light .bg-zinc-950, html.light [class*="bg-zinc-950/"] { background-color: #f4f7fb !important; }
+        html.light .bg-zinc-900, html.light [class*="bg-zinc-900/"] { background-color: #ffffff !important; }
+        html.light .bg-zinc-800, html.light [class*="bg-zinc-800/"] { background-color: #edf2f8 !important; }
+        html.light .bg-zinc-700, html.light [class*="bg-zinc-700/"] { background-color: #e2e8f0 !important; }
+        html.light .text-white { color: #172033 !important; }
+        html.light .text-zinc-100, html.light .text-zinc-200 { color: #263449 !important; }
+        html.light .text-zinc-300, html.light .text-zinc-400 { color: #526176 !important; }
+        html.light .text-zinc-500, html.light .text-zinc-600 { color: #718096 !important; }
+        html.light [class*="border-white/"] { border-color: #dbe3ee !important; }
+        html.light input:not([type="file"]), html.light select, html.light textarea {
+            background-color: #ffffff !important; color: #172033 !important; border-color: #d5deea !important;
+        }
+        html.light input::placeholder, html.light textarea::placeholder { color: #8794a7 !important; }
+        html.light #storeGrid article { background-color: #ffffff !important; border-color: #dbe3ee !important; box-shadow: 0 10px 28px rgba(15,23,42,.07) !important; }
+        html.light #emptyState { background-color: rgba(255,255,255,.72) !important; border-color: #cbd5e1 !important; }
+        html.light .bg-black\/75 { background-color: rgba(15,23,42,.55) !important; }
+        html.light ::-webkit-scrollbar-track { background: #edf2f8; }
+        html.light ::-webkit-scrollbar-thumb { background: #c4cfdd; }
+        html.light ::-webkit-scrollbar-thumb:hover { background: rgba(8,145,178,.65); }
+        html.light #themeToggleBtn { background: #ffffff !important; color: #475569 !important; border-color: #d5deea !important; }
+        html.light #themeToggleBtn:hover { background: #eaf7fb !important; color: #0891b2 !important; }
+        html.light .from-white { --tw-gradient-from: #172033 var(--tw-gradient-from-position) !important; }
+        html.light .to-zinc-400 { --tw-gradient-to: #64748b var(--tw-gradient-to-position) !important; }
+        @media (prefers-reduced-motion: no-preference) {
+            html, body, nav, #storeGrid article { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+        }
+
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen font-sans selection:bg-cyan-500/30 selection:text-cyan-200 relative overflow-x-hidden">
@@ -136,6 +168,12 @@
                 <!-- ล้างข้อมูลทั้งหมด -->
                 <button onclick="resetToDefault()" title="ล้างข้อมูลทั้งหมด" class="p-2.5 rounded-xl bg-zinc-900 hover:bg-red-950/50 text-zinc-400 hover:text-red-400 border border-white/10 transition text-xs">
                     <i class="fa-solid fa-rotate-left"></i>
+                </button>
+
+                <!-- สลับ Light / Dark Mode -->
+                <button id="themeToggleBtn" type="button" onclick="toggleTheme()" aria-label="สลับธีม" title="สลับ Light / Dark Mode" class="p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-cyan-400 border border-white/10 transition flex items-center justify-center" aria-pressed="false">
+                    <i id="themeToggleIcon" class="fa-solid fa-sun"></i>
+                    <span id="themeToggleLabel" class="hidden md:inline ml-1.5 text-xs">Light</span>
                 </button>
 
                 <!-- ปุ่มเพิ่มลิงก์ใหม่ -->
@@ -1682,5 +1720,45 @@
             return JSON.stringify(String(str ?? '')).slice(1, -1);
         }
     </script>
+
+<script>
+    // Theme preference is separate from the app's link data and PWA settings.
+    const THEME_STORAGE_KEY = 'linkHubTheme';
+    function getSavedTheme() {
+        try {
+            const saved = localStorage.getItem(THEME_STORAGE_KEY);
+            return saved === 'light' || saved === 'dark' ? saved : 'dark';
+        } catch (error) {
+            return 'dark';
+        }
+    }
+    function applyTheme(theme, persist = true) {
+        const selected = theme === 'light' ? 'light' : 'dark';
+        document.documentElement.classList.toggle('light', selected === 'light');
+        document.documentElement.classList.toggle('dark', selected === 'dark');
+        const button = document.getElementById('themeToggleBtn');
+        const icon = document.getElementById('themeToggleIcon');
+        const label = document.getElementById('themeToggleLabel');
+        if (button) {
+            button.setAttribute('aria-pressed', String(selected === 'light'));
+            button.setAttribute('aria-label', selected === 'dark' ? 'เปลี่ยนเป็น Light Mode' : 'เปลี่ยนเป็น Dark Mode');
+            button.title = selected === 'dark' ? 'เปลี่ยนเป็น Light Mode' : 'เปลี่ยนเป็น Dark Mode';
+        }
+        if (icon) icon.className = selected === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        if (label) label.textContent = selected === 'dark' ? 'Light' : 'Dark';
+        const themeColor = document.querySelector('meta[name="theme-color"]');
+        if (themeColor) themeColor.setAttribute('content', selected === 'dark' ? '#09090b' : '#f4f7fb');
+        if (persist) {
+            try { localStorage.setItem(THEME_STORAGE_KEY, selected); }
+            catch (error) { console.warn('ไม่สามารถบันทึกธีมได้', error); }
+        }
+    }
+    function toggleTheme() {
+        const nextTheme = document.documentElement.classList.contains('light') ? 'dark' : 'light';
+        applyTheme(nextTheme);
+    }
+    applyTheme(getSavedTheme(), false);
+</script>
+
 </body>
 </html>
