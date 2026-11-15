@@ -122,6 +122,18 @@
         @media (prefers-reduced-motion: no-preference) {
             html, body, nav, #storeGrid article { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
         }
+        :root { --hub-accent: #06b6d4; --hub-accent-soft: rgba(6,182,212,.16); }
+        html[data-accent="purple"] { --hub-accent:#a855f7; --hub-accent-soft:rgba(168,85,247,.16); }
+        html[data-accent="emerald"] { --hub-accent:#10b981; --hub-accent-soft:rgba(16,185,129,.16); }
+        html[data-accent="rose"] { --hub-accent:#f43f5e; --hub-accent-soft:rgba(244,63,94,.16); }
+        html[data-accent="amber"] { --hub-accent:#f59e0b; --hub-accent-soft:rgba(245,158,11,.16); }
+        html[data-accent="blue"] { --hub-accent:#3b82f6; --hub-accent-soft:rgba(59,130,246,.16); }
+        html[data-accent] .accent-surface { background:var(--hub-accent-soft) !important; border-color:var(--hub-accent) !important; }
+        html[data-accent] .accent-text { color:var(--hub-accent) !important; }
+        html[data-accent] .accent-button { background:var(--hub-accent) !important; }
+        #storeGrid article.dragging { opacity:.45; transform:scale(.98); }
+        #storeGrid article.drag-over { outline:2px dashed var(--hub-accent); outline-offset:4px; }
+        #quickSearchModal .quick-result[aria-selected="true"] { background:var(--hub-accent-soft); border-color:var(--hub-accent); }
 
     </style>
 </head>
@@ -203,6 +215,12 @@
             </p>
         </header>
 
+        <!-- Quick Search shortcut -->
+        <section class="max-w-xl mx-auto mb-3 flex justify-end">
+            <button type="button" onclick="openQuickSearch()" class="text-xs text-zinc-400 hover:text-cyan-300 transition flex items-center gap-2">
+                <i class="fa-solid fa-command"></i> ค้นหาด่วน <kbd class="px-1.5 py-0.5 rounded border border-white/15 bg-zinc-900 text-[10px]">Ctrl K</kbd>
+            </button>
+        </section>
         <!-- ช่องค้นหาเรียลไทม์ -->
         <section class="max-w-xl mx-auto mb-6">
             <div class="relative group">
@@ -227,7 +245,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-[minmax(220px,1fr)_auto_auto] gap-3 lg:gap-4 items-stretch">
             <select id="sortSelect" onchange="renderStores()" aria-label="เรียงลำดับ" class="min-h-12 px-4 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-200 w-full sm:min-w-52">
               <option value="newest">เพิ่มล่าสุด</option><option value="oldest">เพิ่มเก่าสุด</option>
-              <option value="name-asc">ชื่อ A–Z</option><option value="name-desc">ชื่อ Z–A</option><option value="category">หมวดหมู่</option><option value="recently-visited">เปิดล่าสุด</option>
+              <option value="name-asc">ชื่อ A–Z</option><option value="name-desc">ชื่อ Z–A</option><option value="category">หมวดหมู่</option><option value="recently-visited">เปิดล่าสุด</option><option value="manual">กำหนดเอง (ลากจัดเรียง)</option>
             </select>
             <button id="favoritesFilterBtn" type="button" onclick="toggleFavoritesFilter()" aria-pressed="false" class="min-h-12 px-5 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-300 whitespace-nowrap hover:border-rose-400/40 transition"><i class="fa-regular fa-heart mr-1"></i>รายการโปรด <span id="favoriteCount">0</span></button>
             <button type="button" onclick="checkAllLinks()" class="min-h-11 px-4 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-300"><i class="fa-solid fa-link mr-1"></i>ตรวจสอบลิงก์</button>
@@ -235,6 +253,14 @@
           <p class="mt-2 text-[11px] text-zinc-500">ค้นหาได้จากชื่อ คำอธิบาย URL และช่องทางติดต่อ</p>
         </section>
 
+        <!-- Custom accent theme and manual ordering -->
+        <section class="max-w-5xl mx-auto mb-4 flex flex-wrap items-center justify-end gap-2">
+            <label for="accentThemeSelect" class="text-xs text-zinc-500"><i class="fa-solid fa-palette mr-1"></i>สีธีม</label>
+            <select id="accentThemeSelect" onchange="applyAccentTheme(this.value)" aria-label="เลือกสีธีม" class="px-3 py-2 rounded-xl bg-zinc-900 border border-white/10 text-xs text-zinc-200">
+                <option value="cyan">Cyan</option><option value="purple">Purple</option><option value="emerald">Emerald</option><option value="rose">Rose</option><option value="amber">Amber</option><option value="blue">Blue</option>
+            </select>
+            <button type="button" onclick="enableManualSort()" class="px-3 py-2 rounded-xl bg-zinc-900 border border-white/10 text-xs text-zinc-300 hover:text-cyan-300"><i class="fa-solid fa-up-down-left-right mr-1"></i>จัดเรียงด้วยการลาก</button>
+        </section>
         <!-- View and language preferences -->
         <section class="max-w-5xl mx-auto mb-6 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-2">
@@ -307,6 +333,28 @@
     </main>
 
     <!-- ================= MODALS ================= -->
+
+    <div id="quickSearchModal" class="fixed inset-0 z-[70] hidden items-start justify-center p-4 pt-[12vh] bg-black/75 backdrop-blur-sm" onclick="if(event.target===this)closeQuickSearch()">
+        <div class="w-full max-w-xl rounded-2xl bg-zinc-900 border border-white/10 shadow-2xl overflow-hidden">
+            <div class="p-3 border-b border-white/10 flex items-center gap-3">
+                <i class="fa-solid fa-magnifying-glass text-cyan-400"></i>
+                <input id="quickSearchInput" type="text" autocomplete="off" placeholder="ค้นหาลิงก์ ชื่อ หมวดหมู่ หรือแท็ก..." oninput="renderQuickSearchResults()" class="flex-1 bg-transparent outline-none text-sm text-white placeholder-zinc-500">
+                <kbd class="text-[10px] text-zinc-500 border border-white/10 rounded px-1.5 py-1">ESC</kbd>
+            </div>
+            <div id="quickSearchResults" class="p-2 max-h-[55vh] overflow-y-auto"></div>
+            <div class="px-4 py-2 border-t border-white/10 text-[10px] text-zinc-500">กด Enter เพื่อเปิดลิงก์แรก • Esc เพื่อปิด</div>
+        </div>
+    </div>
+
+    <div id="websitePreviewModal" class="fixed inset-0 z-[65] hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm" onclick="if(event.target===this)closeWebsitePreview()">
+        <div class="w-full max-w-2xl rounded-3xl bg-zinc-900 border border-white/10 shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-white/10">
+                <h3 class="font-semibold text-white"><i class="fa-solid fa-window-maximize text-cyan-400 mr-2"></i>Website Preview</h3>
+                <button type="button" onclick="closeWebsitePreview()" class="w-9 h-9 rounded-xl bg-zinc-800 text-zinc-300"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="websitePreviewContent" class="p-5"></div>
+        </div>
+    </div>
 
     <!-- 1. Modal เพิ่ม / แก้ไขลิงก์ร้านค้า -->
     <div id="storeModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
@@ -579,6 +627,9 @@
         let toastTimeout = null;
         let currentViewMode = 'card';
         let currentLanguage = 'th';
+        let draggedStoreId = '';
+        let quickSearchMatches = [];
+        let quickSearchSelectedIndex = 0;
 
         // เริ่มต้นทำงานเมื่อโหลดหน้าเว็บเสร็จ
         window.onload = function () {
@@ -589,6 +640,8 @@
             renderIconPicker();
             renderStores();
             bindDynamicActions();
+            bindSmartInteractions();
+            loadAccentTheme();
             loadDisplayPreferences();
             refreshMissingCoverImages();
             registerServiceWorker();
@@ -725,7 +778,178 @@
                 if (action === 'edit-store') openModal(id || null);
                 if (action === 'delete-store') confirmDeleteStore(id || '');
                 if (action === 'toggle-favorite') toggleFavorite(id || '');
+                if (action === 'preview-store') openWebsitePreview(id || '');
             });
+        }
+
+        function bindSmartInteractions() {
+            const grid = document.getElementById('storeGrid');
+            grid.addEventListener('dragstart', event => {
+                const card = event.target.closest('[data-store-card][draggable="true"]');
+                if (!card) return;
+                draggedStoreId = card.dataset.storeCard || '';
+                card.classList.add('dragging');
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', draggedStoreId);
+            });
+            grid.addEventListener('dragover', event => {
+                const target = event.target.closest('[data-store-card][draggable="true"]');
+                if (!target || !draggedStoreId || target.dataset.storeCard === draggedStoreId) return;
+                event.preventDefault();
+                target.classList.add('drag-over');
+            });
+            grid.addEventListener('dragleave', event => {
+                const target = event.target.closest('[data-store-card]');
+                if (target && !target.contains(event.relatedTarget)) target.classList.remove('drag-over');
+            });
+            grid.addEventListener('drop', event => {
+                const target = event.target.closest('[data-store-card][draggable="true"]');
+                if (!target || !draggedStoreId) return;
+                event.preventDefault();
+                reorderStores(draggedStoreId, target.dataset.storeCard || '');
+                grid.querySelectorAll('.drag-over,.dragging').forEach(card => card.classList.remove('drag-over','dragging'));
+                draggedStoreId = '';
+            });
+            grid.addEventListener('dragend', () => {
+                grid.querySelectorAll('.drag-over,.dragging').forEach(card => card.classList.remove('drag-over','dragging'));
+                draggedStoreId = '';
+            });
+            document.addEventListener('keydown', event => {
+                if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                    event.preventDefault(); openQuickSearch();
+                } else if (event.key === 'Escape') {
+                    closeQuickSearch(); closeWebsitePreview();
+                } else if (document.getElementById('quickSearchModal').classList.contains('flex') && event.key === 'Enter') {
+                    event.preventDefault(); openQuickSearchMatch();
+                } else if (document.getElementById('quickSearchModal').classList.contains('flex') && event.key === 'ArrowDown') {
+                    event.preventDefault(); moveQuickSearchSelection(1);
+                } else if (document.getElementById('quickSearchModal').classList.contains('flex') && event.key === 'ArrowUp') {
+                    event.preventDefault(); moveQuickSearchSelection(-1);
+                }
+            });
+        }
+
+        function enableManualSort() {
+            favoritesOnly = false;
+            selectedCategory = 'ทั้งหมด';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('sortSelect').value = 'manual';
+            renderCategories();
+            renderStores();
+            showToast('โหมดจัดเรียง: ลากการ์ดไปยังตำแหน่งที่ต้องการ');
+        }
+
+        function reorderStores(sourceId, targetId) {
+            if (!sourceId || !targetId || sourceId === targetId) return;
+            const from = stores.findIndex(item => item.id === sourceId);
+            const to = stores.findIndex(item => item.id === targetId);
+            if (from < 0 || to < 0) return;
+            const [moved] = stores.splice(from, 1);
+            stores.splice(to, 0, moved);
+            if (saveToStorage()) { renderStores(); showToast('บันทึกลำดับลิงก์แล้ว'); }
+        }
+
+        function openWebsitePreview(storeId) {
+            const store = stores.find(item => item.id === storeId);
+            if (!store) return;
+            const modal = document.getElementById('websitePreviewModal');
+            const content = document.getElementById('websitePreviewContent');
+            const host = new URL(formatUrl(store.url)).hostname;
+            const imageUrl = store.coverImage && isHttpUrl(store.coverImage) ? store.coverImage : getFaviconUrl(store.url);
+            content.innerHTML = `
+                <div class="rounded-2xl overflow-hidden border border-white/10 bg-zinc-950">
+                    <div class="h-48 sm:h-64 relative bg-gradient-to-br from-cyan-950 via-zinc-900 to-purple-950">
+                        <img src="${escapeHtml(imageUrl)}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-4 left-5 right-5 flex items-end gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-black/60 border border-white/20 flex items-center justify-center text-white text-xl"><i class="${escapeHtml(store.icon || 'fa-solid fa-link')}"></i></div>
+                            <div class="min-w-0"><h4 class="text-xl font-semibold text-white truncate">${escapeHtml(store.name)}</h4><p class="text-xs text-white/70 truncate">${escapeHtml(host)}</p></div>
+                        </div>
+                    </div>
+                    <div class="p-5 space-y-3">
+                        <p class="text-sm text-zinc-300">${escapeHtml(store.description || 'ไม่มีคำอธิบายเพิ่มเติม')}</p>
+                        <p class="text-xs text-zinc-500 break-all font-mono">${escapeHtml(store.url)}</p>
+                        <div class="flex flex-wrap gap-2">${(store.tags || []).map(tag => `<span class="px-2.5 py-1 rounded-full text-xs accent-surface accent-text border">${escapeHtml(tag)}</span>`).join('')}</div>
+                        <div class="flex gap-2 pt-2">
+                            <a href="${escapeHtml(formatUrl(store.url))}" target="_blank" rel="noopener noreferrer" class="flex-1 text-center py-3 rounded-xl accent-button text-white text-sm font-medium"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>เปิดเว็บไซต์</a>
+                            <button type="button" onclick="copyLink('${escapeJsString(store.url)}')" class="px-4 py-3 rounded-xl bg-zinc-800 text-zinc-200 text-sm"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+        }
+
+        function closeWebsitePreview() {
+            const modal = document.getElementById('websitePreviewModal');
+            if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+        }
+
+        function openQuickSearch() {
+            const modal = document.getElementById('quickSearchModal');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            const input = document.getElementById('quickSearchInput');
+            input.value = '';
+            renderQuickSearchResults();
+            setTimeout(() => input.focus(), 0);
+        }
+
+        function closeQuickSearch() {
+            const modal = document.getElementById('quickSearchModal');
+            if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+        }
+
+        function renderQuickSearchResults() {
+            const query = document.getElementById('quickSearchInput').value.trim().toLowerCase();
+            quickSearchMatches = stores.filter(store => !query ||
+                [store.name, store.url, store.category, store.description, ...(store.tags || [])].some(value => String(value || '').toLowerCase().includes(query)))
+                .sort((a,b) => new Date(b.lastVisited || b.createdAt || 0) - new Date(a.lastVisited || a.createdAt || 0)).slice(0,12);
+            quickSearchSelectedIndex = 0;
+            const container = document.getElementById('quickSearchResults');
+            container.innerHTML = quickSearchMatches.length ? quickSearchMatches.map((store,index) => `
+                <button type="button" data-quick-index="${index}" aria-selected="${index===0}" onclick="openQuickSearchStore('${escapeJsString(store.id)}')" class="quick-result w-full text-left p-3 rounded-xl border border-transparent flex items-center gap-3 hover:bg-zinc-800 transition">
+                    <span class="w-9 h-9 rounded-lg bg-zinc-800 flex items-center justify-center text-cyan-300"><i class="${escapeHtml(store.icon || 'fa-solid fa-link')}"></i></span>
+                    <span class="min-w-0 flex-1"><span class="block text-sm text-zinc-100 truncate">${escapeHtml(store.name)}</span><span class="block text-[11px] text-zinc-500 truncate">${escapeHtml(store.category)} · ${escapeHtml(store.url)}</span></span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs text-zinc-500"></i>
+                </button>`).join('') : '<p class="p-6 text-center text-sm text-zinc-500">ไม่พบลิงก์ที่ตรงกัน</p>';
+        }
+
+        function moveQuickSearchSelection(step) {
+            if (!quickSearchMatches.length) return;
+            quickSearchSelectedIndex = (quickSearchSelectedIndex + step + quickSearchMatches.length) % quickSearchMatches.length;
+            document.querySelectorAll('[data-quick-index]').forEach(button => {
+                const active = Number(button.dataset.quickIndex) === quickSearchSelectedIndex;
+                button.setAttribute('aria-selected', String(active));
+                if (active) button.scrollIntoView({ block:'nearest' });
+            });
+        }
+
+        function openQuickSearchMatch() {
+            const match = quickSearchMatches[quickSearchSelectedIndex];
+            if (match) openQuickSearchStore(match.id);
+        }
+
+        function openQuickSearchStore(storeId) {
+            const store = stores.find(item => item.id === storeId);
+            if (!store) return;
+            store.lastVisited = new Date().toISOString();
+            try { localStorage.setItem('private_link_hub_v3', JSON.stringify(stores)); } catch (error) { console.warn(error); }
+            closeQuickSearch();
+            window.open(formatUrl(store.url), '_blank', 'noopener');
+        }
+
+        function loadAccentTheme() {
+            let saved = 'cyan';
+            try { saved = localStorage.getItem('linkHubAccentTheme') || 'cyan'; } catch (error) {}
+            applyAccentTheme(saved, false);
+        }
+
+        function applyAccentTheme(theme, persist = true) {
+            const allowed = ['cyan','purple','emerald','rose','amber','blue'];
+            const selected = allowed.includes(theme) ? theme : 'cyan';
+            document.documentElement.dataset.accent = selected;
+            const select = document.getElementById('accentThemeSelect');
+            if (select) select.value = selected;
+            if (persist) { try { localStorage.setItem('linkHubAccentTheme', selected); } catch (error) { console.warn(error); } }
         }
 
         function registerServiceWorker() {
@@ -1019,6 +1243,7 @@
                 if (sortMode === 'name-desc') return b.name.localeCompare(a.name, 'th');
                 if (sortMode === 'category') return a.category.localeCompare(b.category, 'th') || a.name.localeCompare(b.name, 'th');
                 if (sortMode === 'recently-visited') return new Date(b.lastVisited || 0) - new Date(a.lastVisited || 0);
+                if (sortMode === 'manual') return stores.indexOf(a) - stores.indexOf(b);
                 return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
             });
             countText.textContent = `แสดง ${filtered.length} รายการ${favoritesOnly ? ' ในรายการโปรด' : ''}${selectedCategory !== "ทั้งหมด" ? ` ในหมวด "${selectedCategory}"` : ""}`;
@@ -1065,8 +1290,9 @@
                         </div>
                     `;
 
+                const canDrag = sortMode === 'manual' && !query && !favoritesOnly && selectedCategory === 'ทั้งหมด';
                 return `
-                    <article class="group relative rounded-3xl bg-zinc-900/80 border border-white/10 ${style.glow} p-5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 shadow-xl">
+                    <article data-store-card="${escapeHtml(store.id)}" ${canDrag ? 'draggable="true"' : ''} class="group relative rounded-3xl bg-zinc-900/80 border border-white/10 ${style.glow} p-5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 shadow-xl ${canDrag ? 'cursor-grab' : ''}">
                         <div>
                             ${coverPanel}
                             <!-- ส่วนบนการ์ด: ไอคอน + ชื่อร้าน + ป้ายหมวดหมู่ -->
@@ -1103,6 +1329,7 @@
                             </a>
                             <button type="button" data-action="copy-link" data-url="${escapeHtml(safeUrl)}" title="คัดลอกลิงก์" class="min-h-11 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 text-zinc-300 hover:text-cyan-300 text-xs flex items-center justify-center gap-2 transition active:scale-[0.98]"><i class="fa-regular fa-copy"></i><span>คัดลอก</span></button>
                             <button type="button" data-action="toggle-favorite" data-id="${escapeHtml(store.id)}" aria-pressed="${Boolean(store.favorite)}" title="รายการโปรด" class="min-h-11 rounded-xl bg-zinc-800/90 hover:bg-rose-500/20 ${store.favorite ? "text-rose-300" : "text-zinc-300"} text-xs flex items-center justify-center transition active:scale-[0.98]"><i class="fa-${store.favorite ? "solid" : "regular"} fa-heart"></i></button>
+                            <button type="button" data-action="preview-store" data-id="${escapeHtml(store.id)}" title="ดูตัวอย่างเว็บไซต์" class="col-span-2 min-h-10 rounded-xl bg-zinc-800/90 hover:bg-cyan-500/20 text-zinc-300 hover:text-cyan-300 text-xs flex items-center justify-center gap-2 transition"><i class="fa-solid fa-eye"></i><span>Preview</span></button>
                             <button type="button" data-action="edit-store" data-id="${escapeHtml(store.id)}" title="แก้ไขลิงก์" class="col-span-2 min-h-10 rounded-xl bg-zinc-800/90 hover:bg-amber-500/20 text-zinc-300 hover:text-amber-300 text-xs flex items-center justify-center gap-2 transition"><i class="fa-solid fa-pen"></i><span>แก้ไข</span></button>
                             <button type="button" data-action="delete-store" data-id="${escapeHtml(store.id)}" title="ลบลิงก์" class="col-span-2 min-h-10 rounded-xl bg-zinc-800/90 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 text-xs flex items-center justify-center gap-2 transition"><i class="fa-solid fa-trash"></i><span>ลบ</span></button>
                         </div>
@@ -1241,6 +1468,7 @@
             'เพิ่มล่าสุด': 'Newest', 'เพิ่มเก่าสุด': 'Oldest', 'ชื่อ A–Z': 'Name A–Z', 'ชื่อ Z–A': 'Name Z–A', 'หมวดหมู่': 'Category', 'เปิดล่าสุด': 'Recently visited',
             'แท็ก (ไม่บังคับ)': 'Tags (optional)', 'คั่นแต่ละแท็กด้วยเครื่องหมายจุลภาค ระบบจะใช้แท็กในการค้นหาและจัดกลุ่ม': 'Separate tags with commas. Tags are searchable.',
             'รายการโปรด': 'Favorites', 'ตรวจสอบลิงก์': 'Check links',
+            'ค้นหาด่วน': 'Quick search', 'จัดเรียงด้วยการลาก': 'Drag to reorder', 'กำหนดเอง (ลากจัดเรียง)': 'Manual (drag to reorder)',
             'ค้นหาได้จากชื่อ คำอธิบาย URL และช่องทางติดต่อ': 'Search by name, description, URL, and contact links',
             'เพิ่มหมวดหมู่': 'Add category', 'จัดการหมวดหมู่': 'Manage categories',
             'บันทึกอัตโนมัติในเครื่อง': 'Saved locally on this device',
