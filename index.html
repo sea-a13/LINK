@@ -147,13 +147,13 @@
         </section>
 
         <!-- Advanced directory controls -->
-        <section class="max-w-5xl mx-auto mb-6">
-          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2">
-            <select id="sortSelect" onchange="renderStores()" aria-label="เรียงลำดับ" class="min-h-11 px-3 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-200">
+        <section class="max-w-5xl mx-auto mb-8">
+          <div class="grid grid-cols-1 sm:grid-cols-[minmax(220px,1fr)_auto_auto] gap-3 lg:gap-4 items-stretch">
+            <select id="sortSelect" onchange="renderStores()" aria-label="เรียงลำดับ" class="min-h-12 px-4 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-200 w-full sm:min-w-52">
               <option value="newest">เพิ่มล่าสุด</option><option value="oldest">เพิ่มเก่าสุด</option>
               <option value="name-asc">ชื่อ A–Z</option><option value="name-desc">ชื่อ Z–A</option><option value="category">หมวดหมู่</option>
             </select>
-            <button id="favoritesFilterBtn" type="button" onclick="toggleFavoritesFilter()" aria-pressed="false" class="min-h-11 px-4 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-300"><i class="fa-regular fa-heart mr-1"></i>รายการโปรด <span id="favoriteCount">0</span></button>
+            <button id="favoritesFilterBtn" type="button" onclick="toggleFavoritesFilter()" aria-pressed="false" class="min-h-12 px-5 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-300 whitespace-nowrap hover:border-rose-400/40 transition"><i class="fa-regular fa-heart mr-1"></i>รายการโปรด <span id="favoriteCount">0</span></button>
             <button type="button" onclick="checkAllLinks()" class="min-h-11 px-4 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-300"><i class="fa-solid fa-link mr-1"></i>ตรวจสอบลิงก์</button>
           </div>
           <p class="mt-2 text-[11px] text-zinc-500">ค้นหาได้จากชื่อ คำอธิบาย URL และช่องทางติดต่อ</p>
@@ -161,13 +161,13 @@
 
         <!-- แถบกรองหมวดหมู่ + ปุ่มเพิ่ม/จัดการหมวดหมู่ -->
         <section class="max-w-5xl mx-auto mb-8">
-            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 justify-start sm:justify-center">
+            <div class="flex items-center gap-3 overflow-x-auto no-scrollbar pb-3 justify-start sm:justify-center">
                 <div id="categoryContainer" class="flex items-center gap-2">
                     <!-- ปุ่มหมวดหมู่จะถูกสร้างด้วย JavaScript -->
                 </div>
 
                 <!-- ปุ่มเพิ่ม & จัดการหมวดหมู่ -->
-                <div class="flex items-center gap-1.5 pl-1 shrink-0">
+                <div class="flex items-center gap-2.5 pl-2 ml-1 shrink-0 border-l border-white/10">
                     <button onclick="openCategoryModal(true)" class="px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium bg-zinc-900 hover:bg-cyan-500/20 text-cyan-400 border border-dashed border-cyan-500/40 hover:border-cyan-400 flex items-center gap-1.5 whitespace-nowrap transition">
                         <i class="fa-solid fa-plus text-xs"></i>
                         <span>เพิ่มหมวดหมู่</span>
@@ -190,7 +190,7 @@
         </div>
 
         <!-- ตารางแสดงการ์ดลิงก์ร้านค้า -->
-        <section id="storeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <section id="storeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-7">
             <!-- การ์ดจะถูกสร้างด้วย JavaScript -->
         </section>
 
@@ -985,27 +985,15 @@
                             </div>
                         </div>
 
-                        <!-- ปุ่ม 4 ปุ่มแสดงทันทีบนการ์ด -->
-                        <div class="grid grid-cols-5 gap-1.5 pt-2 border-t border-white/5">
-                            <a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" class="col-span-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-cyan-500/90 to-purple-600/90 hover:from-cyan-400 hover:to-purple-500 text-white font-medium text-xs flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/10 transition active:scale-95">
-                                <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
-                                <span>เปิดลิงก์</span>
+                        <!-- ปุ่มการทำงาน แยกช่องชัดเจน -->
+                        <div class="grid grid-cols-4 gap-2 pt-3 border-t border-white/5">
+                            <a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" class="col-span-2 min-h-11 px-3 rounded-xl bg-gradient-to-r from-cyan-500/90 to-purple-600/90 hover:from-cyan-400 hover:to-purple-500 text-white font-medium text-xs flex items-center justify-center gap-2 shadow-md shadow-cyan-500/10 transition active:scale-[0.98]">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i><span>เปิดลิงก์</span>
                             </a>
-
-                            <button type="button" data-action="copy-link" data-url="${escapeHtml(safeUrl)}" title="คัดลอกลิงก์" class="py-2.5 px-2 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 text-zinc-300 hover:text-cyan-300 text-xs font-medium flex items-center justify-center gap-1 transition active:scale-95">
-                                <i class="fa-regular fa-copy"></i>
-                                <span class="hidden sm:inline">คัดลอก</span>
-                            </button>
-
-                            <button type="button" data-action="toggle-favorite" data-id="${escapeHtml(store.id)}" aria-pressed="${Boolean(store.favorite)}" title="รายการโปรด" class="py-2.5 px-2 rounded-xl bg-zinc-800/90 hover:bg-rose-500/20 ${store.favorite ? 'text-rose-300' : 'text-zinc-300'} text-xs flex items-center justify-center transition"><i class="fa-${store.favorite ? 'solid' : 'regular'} fa-heart"></i></button>
-                            <div class="grid grid-cols-2 gap-1">
-                                <button type="button" data-action="edit-store" data-id="${escapeHtml(store.id)}" title="แก้ไขลิงก์" class="py-2.5 rounded-xl bg-zinc-800/90 hover:bg-amber-500/20 text-zinc-300 hover:text-amber-300 text-xs flex items-center justify-center transition active:scale-95">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                <button type="button" data-action="delete-store" data-id="${escapeHtml(store.id)}" title="ลบลิงก์" class="py-2.5 rounded-xl bg-zinc-800/90 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 text-xs flex items-center justify-center transition active:scale-95">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
+                            <button type="button" data-action="copy-link" data-url="${escapeHtml(safeUrl)}" title="คัดลอกลิงก์" class="min-h-11 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 text-zinc-300 hover:text-cyan-300 text-xs flex items-center justify-center gap-2 transition active:scale-[0.98]"><i class="fa-regular fa-copy"></i><span>คัดลอก</span></button>
+                            <button type="button" data-action="toggle-favorite" data-id="${escapeHtml(store.id)}" aria-pressed="${Boolean(store.favorite)}" title="รายการโปรด" class="min-h-11 rounded-xl bg-zinc-800/90 hover:bg-rose-500/20 ${store.favorite ? "text-rose-300" : "text-zinc-300"} text-xs flex items-center justify-center transition active:scale-[0.98]"><i class="fa-${store.favorite ? "solid" : "regular"} fa-heart"></i></button>
+                            <button type="button" data-action="edit-store" data-id="${escapeHtml(store.id)}" title="แก้ไขลิงก์" class="col-span-2 min-h-10 rounded-xl bg-zinc-800/90 hover:bg-amber-500/20 text-zinc-300 hover:text-amber-300 text-xs flex items-center justify-center gap-2 transition"><i class="fa-solid fa-pen"></i><span>แก้ไข</span></button>
+                            <button type="button" data-action="delete-store" data-id="${escapeHtml(store.id)}" title="ลบลิงก์" class="col-span-2 min-h-10 rounded-xl bg-zinc-800/90 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 text-xs flex items-center justify-center gap-2 transition"><i class="fa-solid fa-trash"></i><span>ลบ</span></button>
                         </div>
                         ${(/ร้าน|ลิ้งโปรแกรม|ลิงก์โปรแกรม/.test(String(store.category || '')) && (store.discordUrl || store.telegramUrl)) ? `
                             <div class="grid grid-cols-2 gap-2 mt-2">
