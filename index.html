@@ -1010,9 +1010,17 @@
         function loadAccentTheme() {
             let saved = 'red';
             try {
-                saved = localStorage.getItem('linkHubAccentTheme') || 'red';
-                // Migrate the old default accent to the new red-and-black site theme.
-                if (saved === 'cyan') saved = 'red';
+                const migrationKey = 'linkHubRedBlackDefaultV1';
+                const hasMigrated = localStorage.getItem(migrationKey) === '1';
+                if (!hasMigrated) {
+                    // Existing browsers may have a previously saved Rose/Cyan/etc. theme.
+                    // Set the new site-wide default to red once, then respect future user choices.
+                    saved = 'red';
+                    localStorage.setItem('linkHubAccentTheme', 'red');
+                    localStorage.setItem(migrationKey, '1');
+                } else {
+                    saved = localStorage.getItem('linkHubAccentTheme') || 'red';
+                }
             } catch (error) {}
             applyAccentTheme(saved, true);
         }
