@@ -1162,7 +1162,8 @@
 
         const UI_TRANSLATIONS = {
             'มุมมอง': 'View', 'การ์ด': 'Cards', 'รายการ': 'List', 'กะทัดรัด': 'Compact',
-            'ภาษา': 'Language', 'สำรองข้อมูล': 'Backup', 'นำเข้า': 'Import',
+            'ภาษา': 'Language', 'ทั้งหมด': 'All', 'กำลังดึงภาพปก...': 'Loading cover...',
+            'สำรองข้อมูล': 'Backup', 'นำเข้า': 'Import',
             'เพิ่มลิงก์': 'Add link', 'ส่วนตัว': 'Private', 'คลังรวมลิงก์ร้านค้าส่วนตัว': 'Private link directory',
             'รวมลิงก์ร้านค้าและโปรแกรมสำคัญของคุณไว้ในที่เดียว เข้าถึงไว ปลอดภัย ดูได้คนเดียว': 'Keep your useful websites and software links organized in one place.',
             'ค้นหาชื่อร้าน, คำอธิบาย, หรือหมวดหมู่...': 'Search names, descriptions, or categories...',
@@ -1202,19 +1203,27 @@
                 const original = node.nodeValue;
                 const trimmed = original.trim();
                 if (!trimmed) continue;
-                const translated = dictionary[trimmed];
-                if (translated) {
-                    node.nodeValue = original.replace(trimmed, translated);
-                }
+                let translated = trimmed;
+                Object.entries(dictionary).sort((a, b) => b[0].length - a[0].length).forEach(([source, target]) => {
+                    translated = translated.split(source).join(target);
+                });
+                if (translated !== trimmed) node.nodeValue = original.replace(trimmed, translated);
             }
             document.querySelectorAll('[placeholder], [title], [aria-label]').forEach(element => {
                 ['placeholder', 'title', 'aria-label'].forEach(attribute => {
                     const value = element.getAttribute(attribute);
                     if (!value) return;
-                    const translated = dictionary[value];
-                    if (translated) element.setAttribute(attribute, translated);
+                    let translated = value;
+                    Object.entries(dictionary).sort((a, b) => b[0].length - a[0].length).forEach(([source, target]) => {
+                        translated = translated.split(source).join(target);
+                    });
+                    if (translated !== value) element.setAttribute(attribute, translated);
                 });
             });
+            if (!window.linkHubTranslationObserver && document.body) {
+                window.linkHubTranslationObserver = new MutationObserver(() => translatePage());
+                window.linkHubTranslationObserver.observe(document.body, { childList: true, subtree: true });
+            }
         }
 
         function setLanguage(language) {
