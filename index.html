@@ -1375,6 +1375,7 @@
         // --- แสดงผลการ์ดลิงก์ทั้งหมด ---
         function renderStores() {
             renderInsights();
+            renderDuplicateDetectorCount();
             const grid = document.getElementById('storeGrid');
             const emptyState = document.getElementById('emptyState');
             const countText = document.getElementById('itemCountText');
