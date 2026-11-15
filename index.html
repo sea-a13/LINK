@@ -409,6 +409,16 @@
             </span>
         </div>
 
+        <section id="bulkToolbar" class="max-w-5xl mx-auto mb-5 rounded-2xl border border-red-500/25 bg-zinc-900/80 p-3 sm:p-4 space-y-3">
+            <div class="flex flex-wrap items-center gap-2"><div class="mr-auto"><p class="text-sm font-semibold text-zinc-100"><i class="fa-solid fa-list-check text-red-400 mr-1.5"></i>จัดการหลายรายการ</p><p class="text-[11px] text-zinc-500">เลือกการ์ดเพื่อเปลี่ยนหมวดหมู่หรือลบพร้อมกัน</p></div>
+                <button type="button" onclick="selectVisibleStores()" class="px-3 py-2 rounded-lg bg-zinc-800 border border-white/10 text-xs text-zinc-300">เลือกที่แสดง</button>
+                <button type="button" onclick="clearStoreSelection()" class="px-3 py-2 rounded-lg bg-zinc-800 border border-white/10 text-xs text-zinc-300">ยกเลิกเลือก</button><span id="bulkSelectedCount" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-300 text-xs">เลือก 0 รายการ</span></div>
+            <div class="flex flex-col sm:flex-row gap-2"><select id="bulkCategorySelect" aria-label="หมวดหมู่ปลายทาง" class="flex-1 min-w-0 px-3 py-2.5 rounded-lg bg-zinc-950 border border-white/10 text-sm text-zinc-200"><option value="">เลือกหมวดหมู่ปลายทาง...</option></select>
+                <button type="button" onclick="bulkMoveStores()" class="px-4 py-2.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs">ย้ายหมวดหมู่</button><button type="button" onclick="bulkDeleteStores()" class="px-4 py-2.5 rounded-lg bg-zinc-800 border border-red-500/30 text-red-300 text-xs">ลบที่เลือก</button></div>
+        </section>
+        <section class="max-w-5xl mx-auto mb-5 flex flex-wrap items-center gap-2"><span class="text-xs text-zinc-500 mr-auto"><i class="fa-solid fa-clock-rotate-left text-red-400 mr-1"></i>ประวัติการเปลี่ยนแปลง</span><span id="undoHistoryLabel" class="text-[11px] text-zinc-500">ยังไม่มีประวัติ</span>
+            <button id="undoBtn" type="button" onclick="undoStoreChange()" disabled class="px-3 py-2 rounded-lg bg-zinc-900 border border-white/10 text-xs text-zinc-500 disabled:opacity-40">Undo</button><button id="redoBtn" type="button" onclick="redoStoreChange()" disabled class="px-3 py-2 rounded-lg bg-zinc-900 border border-white/10 text-xs text-zinc-500 disabled:opacity-40">Redo</button></section>
+
         <!-- Advanced backup and restore -->
         <section class="max-w-5xl mx-auto mb-6 flex flex-wrap items-center gap-2 rounded-2xl border border-red-500/20 bg-red-950/10 p-3">
             <div class="mr-auto min-w-[180px]">
@@ -753,6 +763,10 @@
         let cardPreferences = { showCover: true, showDescription: true, showUrl: true, shape: 'rounded' };
         const LINK_ACTIVITY_KEY = 'linkhub_activity_v1', LINK_NOTIFICATIONS_KEY = 'linkhub_notifications_v1', LINK_GROUP_MODE_KEY = 'linkhub_group_mode_v1';
         let linkActivity = [], linkNotifications = [], smartGroupMode = 'none';
+        const selectedStoreIds = new Set();
+        const UNDO_HISTORY_KEY = 'linkhub_undo_history_v1';
+        const MAX_UNDO_STEPS = 30;
+        let undoStack = [], redoStack = [];
 
         // เริ่มต้นทำงานเมื่อโหลดหน้าเว็บเสร็จ
         window.onload = function () {
@@ -771,6 +785,8 @@
             loadLinkInsights();
             renderInsights();
             renderDuplicateDetectorCount();
+            loadUndoHistory();
+            updateUndoRedoButtons();
             refreshMissingCoverImages();
             registerServiceWorker();
         };
@@ -895,6 +911,11 @@
             categoryContainer.addEventListener('click', event => {
                 const button = event.target.closest('[data-action="select-category"]');
                 if (button) selectCategory(button.dataset.category || 'ทั้งหมด');
+            });
+            storeGrid.addEventListener('change', event => {
+                const checkbox=event.target.closest('[data-select-store]');if(!checkbox)return;
+                if(checkbox.checked)selectedStoreIds.add(checkbox.dataset.selectStore);else selectedStoreIds.delete(checkbox.dataset.selectStore);
+                updateBulkToolbar();
             });
             storeGrid.addEventListener('click', event => {
                 const openedLink = event.target.closest('[data-open-store]');
@@ -1478,6 +1499,7 @@
                         <div>
                             ${coverPanel}
                             <!-- ส่วนบนการ์ด: ไอคอน + ชื่อร้าน + ป้ายหมวดหมู่ -->
+                            <label class="inline-flex items-center gap-1.5 text-[11px] text-zinc-500 cursor-pointer mb-3"><input type="checkbox" data-select-store="${escapeHtml(store.id)}" ${selectedStoreIds.has(store.id) ? 'checked' : ''} aria-label="เลือก ${escapeHtml(store.name)}" class="w-4 h-4 accent-red-500 rounded"><span>เลือก</span></label>
                             <div class="flex items-start gap-3.5 mb-3">
                                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${style.iconBg} border flex items-center justify-center text-lg shrink-0 shadow-inner">
                                     <i class="${escapeHtml(store.icon || 'fa-solid fa-link')}"></i>
@@ -1522,6 +1544,7 @@
                     </article>
                 `;
             }).join('');
+            updateBulkToolbar();
             translatePage();
         }
 
@@ -1878,6 +1901,7 @@
 
         function saveStore(event) {
             if (event) event.preventDefault();
+            const undoBefore=captureUndoState();
 
             // สำรองข้อมูลเดิมไว้ เผื่อ LocalStorage บันทึกไม่สำเร็จ
             const previousStores = stores.map(store => ({ ...store }));
@@ -1963,7 +1987,7 @@
                 renderStores();
                 return;
             }
-
+            recordUndoChange(undoBefore,id?'แก้ไขลิงก์':'เพิ่มลิงก์');
             renderStores();
             renderDuplicateDetectorCount();
             closeModal();
@@ -1978,17 +2002,46 @@
             const store = stores.find(s => s.id === storeId);
             if (!store) return;
 
+            const undoBefore=captureUndoState();
             openConfirmModal(
                 `ลบลิงก์ "${store.name}"?`,
                 "รายการนี้จะถูกลบออกจากคลังลิงก์ส่วนตัวของคุณอย่างถาวร",
                 () => {
                     stores = stores.filter(s => s.id !== storeId);
-                    saveToStorage();
+                    if(!saveToStorage())return;
+                    recordUndoChange(undoBefore,'ลบลิงก์');selectedStoreIds.delete(storeId);
                     renderStores();
                     showToast("ลบลิงก์เรียบร้อยแล้ว");
                 }
             );
         }
+
+
+        function updateBulkToolbar(){
+            selectedStoreIds.forEach(id=>{if(!stores.some(s=>s.id===id))selectedStoreIds.delete(id);});
+            const count=document.getElementById('bulkSelectedCount');if(count)count.textContent='เลือก '+selectedStoreIds.size+' รายการ';
+            const select=document.getElementById('bulkCategorySelect');if(select){const old=select.value;select.innerHTML='<option value="">เลือกหมวดหมู่ปลายทาง...</option>'+categories.map(cat=>'<option value="'+escapeHtml(cat)+'">'+escapeHtml(cat)+'</option>').join('');if(categories.includes(old))select.value=old;}
+        }
+        function selectVisibleStores(){document.querySelectorAll('#storeGrid [data-select-store]').forEach(box=>selectedStoreIds.add(box.dataset.selectStore));renderStores();}
+        function clearStoreSelection(){selectedStoreIds.clear();renderStores();}
+        function bulkMoveStores(){
+            const target=document.getElementById('bulkCategorySelect')?.value||'';if(!selectedStoreIds.size){showToast('กรุณาเลือกลิงก์ก่อน','error');return;}if(!categories.includes(target)){showToast('กรุณาเลือกหมวดหมู่ปลายทาง','error');return;}
+            const before=captureUndoState();let changed=0;stores.forEach(s=>{if(selectedStoreIds.has(s.id)&&s.category!==target){s.category=target;changed++;}});
+            if(!changed){showToast('รายการที่เลือกอยู่ในหมวดหมู่นี้ทั้งหมด','error');return;}if(!saveToStorage()){stores=JSON.parse(before).stores;renderStores();return;}
+            recordUndoChange(before,'ย้าย '+changed+' ลิงก์ไปยัง '+target);selectedStoreIds.clear();selectedCategory='ทั้งหมด';renderCategories();renderStores();showToast('ย้าย '+changed+' รายการแล้ว');
+        }
+        function bulkDeleteStores(){
+            const ids=[...selectedStoreIds];if(!ids.length){showToast('กรุณาเลือกลิงก์ก่อน','error');return;}const before=captureUndoState();
+            openConfirmModal('ลบ '+ids.length+' รายการที่เลือก?','รายการที่เลือกจะถูกลบ และสามารถกด Undo เพื่อกู้คืนได้',()=>{const set=new Set(ids),old=stores.length;stores=stores.filter(s=>!set.has(s.id));if(!saveToStorage()){stores=JSON.parse(before).stores;renderStores();return;}const n=old-stores.length;recordUndoChange(before,'ลบ '+n+' ลิงก์');selectedStoreIds.clear();renderStores();showToast('ลบ '+n+' รายการแล้ว');});
+        }
+        function captureUndoState(){return JSON.stringify({stores:stores.map(s=>({...s,tags:normalizeTags(s.tags)}))});}
+        function persistUndoHistory(){try{localStorage.setItem(UNDO_HISTORY_KEY,JSON.stringify({undo:undoStack.slice(-MAX_UNDO_STEPS),redo:redoStack.slice(-MAX_UNDO_STEPS)}));}catch(e){console.warn('Undo history storage failed',e);}updateUndoRedoButtons();}
+        function loadUndoHistory(){try{const h=JSON.parse(localStorage.getItem(UNDO_HISTORY_KEY)||'{}');undoStack=Array.isArray(h.undo)?h.undo.slice(-MAX_UNDO_STEPS):[];redoStack=Array.isArray(h.redo)?h.redo.slice(-MAX_UNDO_STEPS):[];}catch{undoStack=[];redoStack=[];}}
+        function recordUndoChange(before,label){if(before===captureUndoState())return;undoStack.push({state:before,label:label||'แก้ไขข้อมูล'});undoStack=undoStack.slice(-MAX_UNDO_STEPS);redoStack=[];persistUndoHistory();}
+        function updateUndoRedoButtons(){const u=document.getElementById('undoBtn'),r=document.getElementById('redoBtn');if(u)u.disabled=!undoStack.length;if(r)r.disabled=!redoStack.length;const l=document.getElementById('undoHistoryLabel');if(l)l.textContent=undoStack.length?'ล่าสุด: '+undoStack[undoStack.length-1].label:'ยังไม่มีประวัติ';}
+        function applyUndoSnapshot(item,to,from){if(!item||!item.state)return;const current=captureUndoState(),next=JSON.parse(item.state);if(!Array.isArray(next.stores))return;from.pop();to.push({state:current,label:item.label});const previous=stores;stores=normalizeStores(next.stores,categories);if(!saveToStorage()){stores=previous;to.pop();from.push(item);persistUndoHistory();renderStores();return;}selectedStoreIds.clear();renderStores();persistUndoHistory();showToast(item.label+(from===undoStack?' • ย้อนกลับแล้ว':' • ทำซ้ำแล้ว'));}
+        function undoStoreChange(){if(undoStack.length)applyUndoSnapshot(undoStack[undoStack.length-1],redoStack,undoStack);}
+        function redoStoreChange(){if(redoStack.length)applyUndoSnapshot(redoStack[redoStack.length-1],undoStack,redoStack);}
 
         // --- Modal แก้ไขหัวเว็บ ---
         function openHubEditModal() {
